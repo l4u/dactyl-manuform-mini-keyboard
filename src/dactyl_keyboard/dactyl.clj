@@ -655,10 +655,7 @@
         thumb-connectors
         case-walls
         thumbcaps
-        caps
-        pro-micro-holder
-        usb-holder-holder
-        trrs-holder-hole)))
+        caps)))
 
 (spit "things/right-plate.scad"
       (write-scad
