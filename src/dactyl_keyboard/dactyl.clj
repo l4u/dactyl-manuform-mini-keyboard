@@ -229,9 +229,6 @@
            (->> (sa-cap (if (= column 5) 1 1))
                 (key-place column row)))))
 
-; (pr (rotate-around-y π [10 0 1]))
-; (pr (key-position 1 cornerrow [(/ mount-width 2) (- (/ mount-height 2)) 0]))
-
 ;;;;;;;;;;;;;;;;;;;;
 ;; Web Connectors ;;
 ;;;;;;;;;;;;;;;;;;;;
@@ -290,13 +287,9 @@
 (def thumborigin
   (map + (key-position 1 cornerrow [(/ mount-width 2) (- (/ mount-height 2)) 0])
        thumb-offsets))
-; (pr thumborigin)
 
 (defn thumb-tr-place [shape]
   (->> shape
-      ;  (rotate (deg2rad  10) [1 0 0])
-      ;  (rotate (deg2rad -23) [0 1 0])
-      ;  (rotate (deg2rad  -3) [0 0 1])
        (rotate (deg2rad  10) [1 0 0])
        (rotate (deg2rad -23) [0 1 0])
        (rotate (deg2rad  10) [0 0 1]) ; original 10
@@ -304,9 +297,6 @@
        (translate [-12 -12 3]))) ; original 1.5u  (translate [-12 -16 3])
 (defn thumb-tl-place [shape]
   (->> shape
-      ;  (rotate (deg2rad  10) [1 0 0])
-      ;  (rotate (deg2rad -23) [0 1 0])
-      ;  (rotate (deg2rad  -3) [0 0 1])
        (rotate (deg2rad  10) [1 0 0])
        (rotate (deg2rad -23) [0 1 0])
        (rotate (deg2rad  25) [0 0 1]) ; original 10
@@ -347,7 +337,6 @@
 (defn thumb-1x-layout [shape]
   (union
    (thumb-mr-place shape)
-   ;(thumb-ml-place shape)
    (thumb-br-place shape)
    (thumb-bl-place shape)))
 
@@ -355,13 +344,6 @@
   (union
    (thumb-tr-place shape)
    (thumb-tl-place shape)))
-
-(def larger-plate
-  (let [plate-height (/ (- sa-double-length mount-height) 3)
-        top-plate (->> (cube mount-width plate-height web-thickness)
-                       (translate [0 (/ (+ plate-height mount-height) 2)
-                                   (- plate-thickness (/ web-thickness 2))]))]
-    (union top-plate (mirror [0 1 0] top-plate))))
 
 (def thumbcaps
   (union
@@ -396,12 +378,6 @@
     (thumb-mr-place web-post-tr)
     (thumb-mr-place web-post-br)
     (thumb-tr-place thumb-post-br))
-
-  ;  (triangle-hulls    ; bottom two on the left
-  ;   (thumb-bl-place web-post-tr)
-  ;   (thumb-bl-place web-post-br)
-  ;   (thumb-ml-place web-post-tl)
-  ;   (thumb-ml-place web-post-bl))
 
    (triangle-hulls    ; centers of the bottom four
     (thumb-br-place web-post-tl)
@@ -544,7 +520,6 @@
    (wall-brace thumb-bl-place -1  0 web-post-tl thumb-bl-place  0  1 web-post-tl)
    ; thumb tweeners
    (wall-brace thumb-mr-place  0 -1 web-post-bl thumb-br-place  0 -1 web-post-br)
-  ;  (wall-brace thumb-ml-place  0  1 web-post-tl thumb-bl-place  0  1 web-post-tr)
    (wall-brace thumb-bl-place -1  0 web-post-bl thumb-br-place -1  0 web-post-tl)
    (wall-brace thumb-tr-place  0 -1 thumb-post-br (partial key-place 3 lastrow)  0 -1 web-post-bl)
    ; clunky bit on the top left thumb connection  (normal connectors don't work well)
@@ -598,7 +573,6 @@
        (translate [(- (first pro-micro-position) (/ pro-micro-wall-thickness 2)) (+ (/ pro-micro-wall-thickness 2) (second pro-micro-position)) (last pro-micro-position)])))
 
 (def trrs-holder-size [6.2 13 6]) ; trrs jack PJ-320A
-;(def trrs-holder-position (key-position 0 0 [-3 5.99 0]))
 (def trrs-holder-position  (map + usb-holder-position [-13.6 -4 0]))
 (def trrs-holder-thickness 3)
 (def trrs-holder-thickness-2x (* 2 trrs-holder-thickness))
@@ -640,37 +614,13 @@
   (union (screw-insert 0 0         bottom-radius top-radius height [9 10 0])
          (screw-insert 0 lastrow   bottom-radius top-radius height [0 8 0])
          (screw-insert 3 lastrow  bottom-radius top-radius height [9 4 0])
-         (screw-insert 3 0         bottom-radius top-radius height [6 -4 0])
-         ;(screw-insert lastcol 1   bottom-radius top-radius height)
-))
+         (screw-insert 3 0         bottom-radius top-radius height [6 -4 0])))
 (def screw-insert-height 3.8)
 (def screw-insert-bottom-radius (/ 5.31 2))
 (def screw-insert-top-radius (/ 5.1 2))
 (def screw-insert-holes  (screw-insert-all-shapes screw-insert-bottom-radius screw-insert-top-radius screw-insert-height))
 (def screw-insert-outers (screw-insert-all-shapes (+ screw-insert-bottom-radius 1.6) (+ screw-insert-top-radius 1.6) (+ screw-insert-height 1.5)))
 (def screw-insert-screw-holes  (screw-insert-all-shapes 1.7 1.7 350))
-
-(def wire-post-height 7)
-(def wire-post-overhang 3.5)
-(def wire-post-diameter 2.6)
-(defn wire-post [direction offset]
-  (->> (union (translate [0 (* wire-post-diameter -0.5 direction) 0] (cube wire-post-diameter wire-post-diameter wire-post-height))
-              (translate [0 (* wire-post-overhang -0.5 direction) (/ wire-post-height -2)] (cube wire-post-diameter wire-post-overhang wire-post-diameter)))
-       (translate [0 (- offset) (+ (/ wire-post-height -2) 3)])
-       (rotate (/ α -2) [1 0 0])
-       (translate [3 (/ mount-height -2) 0])))
-
-(def wire-posts
-  (union
-   (thumb-ml-place (translate [-5 0 -2] (wire-post  1 0)))
-   (thumb-ml-place (translate [0 0 -2.5] (wire-post -1 6)))
-   (thumb-ml-place (translate [5 0 -2] (wire-post  1 0)))
-   (for [column (range 0 lastcol)
-         row (range 0 cornerrow)]
-     (union
-      (key-place column row (translate [-5 0 0] (wire-post 1 0)))
-      (key-place column row (translate [0 0 0] (wire-post -1 6)))
-      (key-place column row (translate [5 0 0] (wire-post  1 0)))))))
 
 (def model-right (difference
                   (union
@@ -687,11 +637,7 @@
                                usb-jack
                                pro-micro-space
                                trrs-holder-hole
-                               screw-insert-holes)
-                    ; wire-posts
-                    ; thumbcaps
-                    ; caps
-)
+                               screw-insert-holes))
                   (translate [0 0 -20] (cube 350 350 40))))
 
 (spit "things/right.scad"
@@ -712,13 +658,7 @@
         caps
         pro-micro-holder
         usb-holder-holder
-        trrs-holder-hole
-                    ; trrs-holder-hole
-                    ;             screw-insert-outers
-                    ;             usb-cutout
-                    ;             usb-holder-space
-                                ; wire-posts
-)))
+        trrs-holder-hole)))
 
 (spit "things/right-plate.scad"
       (write-scad
@@ -726,7 +666,6 @@
         (translate [0 0 -0.1]
                    (difference (union case-walls
                                       pro-micro-holder
-                                          ; usb-holder-holder
                                       screw-insert-outers)
                                (translate [0 0 -10] screw-insert-screw-holes))))))
 
