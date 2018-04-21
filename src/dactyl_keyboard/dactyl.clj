@@ -578,7 +578,6 @@
     (thumb-bl-place (translate (wall-locate3 -0.3 1) web-post-tr))
     (thumb-tl-place thumb-post-tl))))
 
-(def usb-holder-start  (map + [0 -3  0] (key-position 1 0 (map + (wall-locate3 0 1) [0 (/ mount-height  2) 0]))))
 (def usb-holder-ref (key-position 0 0 (map + (wall-locate2  0  1) [0 (/ mount-height 2) 0])))
 (def usb-holder-position (map + [12.5 -6 0] [(first usb-holder-ref) (second usb-holder-ref) 4.5]))
 (def usb-holder-cube   (cube 15 10 9))
