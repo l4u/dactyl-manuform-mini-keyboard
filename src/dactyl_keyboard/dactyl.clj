@@ -102,7 +102,6 @@
 ;;;;;;;;;;;;;;;;
 
 (def sa-length 18.25)
-(def sa-double-length 37.5)
 (def sa-cap {1 (let [bl2 (/ 18.5 2)
                      m (/ 17 2)
                      key-cap (hull (->> (polygon [[bl2 bl2] [bl2 (- bl2)] [(- bl2) (- bl2)] [(- bl2) bl2]])
@@ -117,7 +116,7 @@
                  (->> key-cap
                       (translate [0 0 (+ 5 plate-thickness)])
                       (color [220/255 163/255 163/255 1])))
-             2 (let [bl2 (/ sa-double-length 2)
+             2 (let [bl2 sa-length
                      bw2 (/ 18.25 2)
                      key-cap (hull (->> (polygon [[bw2 bl2] [bw2 (- bl2)] [(- bw2) (- bl2)] [(- bw2) bl2]])
                                         (extrude-linear {:height 0.1 :twist 0 :convexity 0})
