@@ -1,6 +1,6 @@
 # The Dactyl-ManuForm-Mini Keyboard
 
-This is a fork of the [Dactyl-Manuform](https://github.com/tshort/dactyl-keyboard).
+This is a fork of the [Dactyl-ManuForm](https://github.com/tshort/dactyl-keyboard).
 
 ## Features
 
