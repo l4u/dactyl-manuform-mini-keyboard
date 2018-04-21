@@ -2,6 +2,18 @@
 
 This is a fork of the [Dactyl-Manuform](https://github.com/tshort/dactyl-keyboard).
 
+## Features
+
+- A TRRS mount instead of a RJ9 mount is used.
+- A micro USB mount is used. A breakout board, or an extension cable can be used.
+- Screw posts are moved inside.
+- The pro micro holder has been modified. Dupont cables can be used.
+
+## Future plans (PR is welcome)
+
+- Move screw posts 3mm upwards so that the bottom plate can be inserted into the case.
+- Add smoothing.
+
 ## Getting the case files and bottom plate
 
 ### Option 1: Generate OpenSCAD and STL models
