@@ -50,6 +50,8 @@
 (def fixed-z [12.1    8.3 0  5   10.7 14.5 17.5])
 (def fixed-tenting (deg2rad 0))
 
+(def create-side-nubs? true) ; Cherry MX and Gateron switches can be used with side nubs. If you use other switches such as Kailh, you should set this as false
+
 ;;;;;;;;;;;;;;;;;;;;;;;
 ;; General variables ;;
 ;;;;;;;;;;;;;;;;;;;;;;;
@@ -87,7 +89,7 @@
                                  (translate [(+ (/ 1.5 2) (/ keyswitch-width 2))
                                              0
                                              (/ plate-thickness 2)]))))
-        plate-half (union top-wall left-wall (with-fn 100 side-nub))]
+        plate-half (union top-wall left-wall (if create-side-nubs? (with-fn 100 side-nub)))]
     (union plate-half
            (->> plate-half
                 (mirror [1 0 0])
