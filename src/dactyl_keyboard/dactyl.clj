@@ -50,7 +50,9 @@
 (def fixed-z [12.1    8.3 0  5   10.7 14.5 17.5])
 (def fixed-tenting (deg2rad 0))
 
-(def create-side-nubs? true) ; Cherry MX and Gateron switches can be used with side nubs. If you use other switches such as Kailh, you should set this as false
+; If you use Cherry MX or Gateron switches, this can be turned on.
+; If you use other switches such as Kailh, you should set this as false
+(def create-side-nubs? false)
 
 ;;;;;;;;;;;;;;;;;;;;;;;
 ;; General variables ;;
