@@ -8,3 +8,4 @@
 *.gcode
 *.scad
 /target
+*.stl
