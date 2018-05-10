@@ -35,7 +35,7 @@ Generated models (only 4x5) can be downloaded from [Releases](https://github.com
 
 ### Option 3: Download from Thingiverse
 
-[Search for Dactyl-ManuForm-Mini on Thingiverse](https://www.thingiverse.com/search?q=DACTYL-MANUFORM-MINI)
+[Search for Dactyl-ManuForm-Mini on Thingiverse](https://www.thingiverse.com/l4u/collections/dactyl-manuform-mini)
 
 ## License
 
