@@ -19,7 +19,7 @@ This is a fork of the [Dactyl-ManuForm](https://github.com/tshort/dactyl-keyboar
 - Move screw posts 3mm upwards so that the bottom plate can be inserted into the case.
 - Add smoothing.
 
-## Getting the case files and bottom plate
+## Getting the case and bottom plate
 
 ### Option 1: Generate OpenSCAD and STL models
 
@@ -35,7 +35,11 @@ Generated models (only 4x5) can be downloaded from [Releases](https://github.com
 
 ### Option 3: Download from Thingiverse
 
-[Search for Dactyl-ManuForm-Mini on Thingiverse](https://www.thingiverse.com/l4u/collections/dactyl-manuform-mini)
+[Dactyl ManuForm Mini on Thingiverse](https://www.thingiverse.com/l4u/collections/dactyl-manuform-mini)
+
+### Option 4: Order from Shapeways
+
+[Order from Shapeways](https://www.shapeways.com/shops/l4u)
 
 ## License
 
