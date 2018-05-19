@@ -547,7 +547,7 @@
 
 (def usb-holder-ref (key-position 0 0 (map - (wall-locate2  0  -1) [0 (/ mount-height 2) 0])))
 
-(def usb-holder-position (map + [16.5 23.2 0] [(first usb-holder-ref) (second usb-holder-ref) 4]))
+(def usb-holder-position (map + [15 23.2 0] [(first usb-holder-ref) (second usb-holder-ref) 4]))
 (def usb-holder-cube   (cube 15 10 6))
 (def usb-holder-space  (translate (map + usb-holder-position [0 (* -1 wall-thickness) 1]) usb-holder-cube))
 (def usb-holder-holder (translate usb-holder-position (cube 19 10 8)))
