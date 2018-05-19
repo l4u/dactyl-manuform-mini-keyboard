@@ -310,14 +310,14 @@
        (rotate (deg2rad -23) [0 1 0])
        (rotate (deg2rad  25) [0 0 1])
        (translate thumborigin)
-       (translate [-21 -36 -10])))
+       (translate [-22 -34.5 -10])))
 (defn thumb-br-place [shape]
   (->> shape
        (rotate (deg2rad   6) [1 0 0])
        (rotate (deg2rad -34) [0 1 0])
        (rotate (deg2rad  35) [0 0 1])
        (translate thumborigin)
-       (translate [-36 -45 -19])))
+       (translate [-37 -43 -19])))
 (defn thumb-bl-place [shape]
   (->> shape
        (rotate (deg2rad   6) [1 0 0])
