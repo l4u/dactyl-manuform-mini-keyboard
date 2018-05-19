@@ -608,11 +608,17 @@
          (screw-insert 0 lastrow   bottom-radius top-radius height [0 8 0])
          (screw-insert 3 lastrow  bottom-radius top-radius height [9 4 0])
          (screw-insert 3 0         bottom-radius top-radius height [6 -4 0])))
-(def screw-insert-height 3.8)
-(def screw-insert-bottom-radius (/ 5.31 2))
-(def screw-insert-top-radius (/ 5.1 2))
+
+; Hole Depth Y: 4.4
+(def screw-insert-height 4)
+
+; Hole Diameter C: 4.1-4.4
+(def screw-insert-bottom-radius (/ 4.4 2))
+(def screw-insert-top-radius (/ 4.4 2))
 (def screw-insert-holes  (screw-insert-all-shapes screw-insert-bottom-radius screw-insert-top-radius screw-insert-height))
-(def screw-insert-outers (screw-insert-all-shapes (+ screw-insert-bottom-radius 1.6) (+ screw-insert-top-radius 1.6) (+ screw-insert-height 1.5)))
+
+; Wall Thickness W:\t1.65
+(def screw-insert-outers (screw-insert-all-shapes (+ screw-insert-bottom-radius 1.65) (+ screw-insert-top-radius 1.65) (+ screw-insert-height 1.5)))
 (def screw-insert-screw-holes  (screw-insert-all-shapes 1.7 1.7 350))
 
 (def model-right (difference
