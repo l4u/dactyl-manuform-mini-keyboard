@@ -619,7 +619,8 @@
   (union (screw-insert 0 0         bottom-radius top-radius height [9 10 0])
          (screw-insert 0 lastrow   bottom-radius top-radius height [0 8 0])
          (screw-insert 3 lastrow  bottom-radius top-radius height [9 4 0])
-         (screw-insert 3 0         bottom-radius top-radius height [6 -4 0])))
+         (screw-insert 3 0         bottom-radius top-radius height [6 -3 0])
+         (screw-insert 1 lastrow         bottom-radius top-radius height [0 -16 0])))
 
 ; Hole Depth Y: 4.4
 (def screw-insert-height 4)
