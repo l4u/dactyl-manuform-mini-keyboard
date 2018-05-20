@@ -559,10 +559,10 @@
 
 (def usb-holder-ref (key-position 0 0 (map - (wall-locate2  0  -1) [0 (/ mount-height 2) 0])))
 
-(def usb-holder-position (map + [15 23.2 0] [(first usb-holder-ref) (second usb-holder-ref) 4]))
-(def usb-holder-cube   (cube 15 10 6))
+(def usb-holder-position (map + [15 22.4 0] [(first usb-holder-ref) (second usb-holder-ref) 4]))
+(def usb-holder-cube   (cube 15 12 6))
 (def usb-holder-space  (translate (map + usb-holder-position [0 (* -1 wall-thickness) 1]) usb-holder-cube))
-(def usb-holder-holder (translate usb-holder-position (cube 19 10 8)))
+(def usb-holder-holder (translate usb-holder-position (cube 19 12 8)))
 
 (def usb-jack (translate (map + usb-holder-position [0 10 1.5]) (cube 8 20 3)))
 
@@ -577,8 +577,8 @@
   (->> (cube (first pro-micro-space-size) (second pro-micro-space-size) (last pro-micro-space-size))
        (translate [(- (first pro-micro-position) (/ pro-micro-wall-thickness 2)) (+ (/ pro-micro-wall-thickness 2) (second pro-micro-position)) (last pro-micro-position)])))
 
-(def trrs-holder-size [6.2 14.1 6]) ; trrs jack PJ-320A
-(def trrs-holder-position  (map + usb-holder-position [-13.6 -6 0]))
+(def trrs-holder-size [6.2 14 6]) ; trrs jack PJ-320A
+(def trrs-holder-position  (map + usb-holder-position [-13.6 -5 0]))
 (def trrs-holder-thickness 2)
 (def trrs-holder-thickness-2x (* 2 trrs-holder-thickness))
 (def trrs-holder
