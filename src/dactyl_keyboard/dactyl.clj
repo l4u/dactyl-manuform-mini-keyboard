@@ -94,7 +94,7 @@
                                              0
                                              (/ plate-thickness 2)]))))
         plate-half (union top-wall left-wall (if create-side-nubs? (with-fn 100 side-nub)))
-        top-nub (->> (cube 4 4 (- plate-thickness retention-tab-hole-thickness))
+        top-nub (->> (cube 5 5 (- plate-thickness retention-tab-hole-thickness))
                      (translate [(+ (/ keyswitch-width 2)) 0 (/ retention-tab-hole-thickness 2)]))
         top-nub-pair (union top-nub
                             (->> top-nub
