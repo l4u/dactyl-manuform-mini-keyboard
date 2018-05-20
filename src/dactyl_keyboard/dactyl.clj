@@ -601,7 +601,7 @@
   (union
    (->> (binding [*fn* 30]
           (cylinder [bottom-radius top-radius] height)))
-   (translate [0 0 (/ height 2)] (sphere top-radius))))
+   (translate [0 0 (/ height 2)] (->> (binding [*fn* 30] (sphere top-radius))))))
 
 (defn screw-insert [column row bottom-radius top-radius height offset]
   (let [shift-right   (= column lastcol)
