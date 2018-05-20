@@ -71,7 +71,9 @@
 
 (def sa-profile-key-height 12.7)
 
-(def plate-thickness 4)
+(def plate-thickness 3)
+(def retention-tab-thickness 1.5)
+(def retention-tab-hole-thickness (- plate-thickness retention-tab-thickness))
 (def mount-width (+ keyswitch-width 3))
 (def mount-height (+ keyswitch-height 3))
 
@@ -91,11 +93,21 @@
                                  (translate [(+ (/ 1.5 2) (/ keyswitch-width 2))
                                              0
                                              (/ plate-thickness 2)]))))
-        plate-half (union top-wall left-wall (if create-side-nubs? (with-fn 100 side-nub)))]
-    (union plate-half
-           (->> plate-half
-                (mirror [1 0 0])
-                (mirror [0 1 0])))))
+        plate-half (union top-wall left-wall (if create-side-nubs? (with-fn 100 side-nub)))
+        top-nub (->> (cube 4 4 (- plate-thickness retention-tab-hole-thickness))
+                     (translate [(+ (/ keyswitch-width 2)) 0 (/ retention-tab-hole-thickness 2)]))
+        top-nub-pair (union top-nub
+                            (->> top-nub
+                                 (mirror [1 0 0])
+                                 (mirror [0 1 0])))]
+    (difference
+     (union plate-half
+            (->> plate-half
+                 (mirror [1 0 0])
+                 (mirror [0 1 0])))
+     (->>
+      top-nub-pair
+      (rotate (/ π 2) [0 0 1])))))
 
 ;;;;;;;;;;;;;;;;
 ;; SA Keycaps ;;
@@ -233,7 +245,7 @@
 ;; Web Connectors ;;
 ;;;;;;;;;;;;;;;;;;;;
 
-(def web-thickness 3.5)
+(def web-thickness 3)
 (def post-size 0.1)
 (def web-post (->> (cube post-size post-size web-thickness)
                    (translate [0 0 (+ (/ web-thickness -2)
