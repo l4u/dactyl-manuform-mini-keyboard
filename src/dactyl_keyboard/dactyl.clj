@@ -577,8 +577,8 @@
   (->> (cube (first pro-micro-space-size) (second pro-micro-space-size) (last pro-micro-space-size))
        (translate [(- (first pro-micro-position) (/ pro-micro-wall-thickness 2)) (+ (/ pro-micro-wall-thickness 2) (second pro-micro-position)) (last pro-micro-position)])))
 
-(def trrs-holder-size [6.2 14 3]) ; trrs jack PJ-320A
-(def trrs-holder-position  (map + usb-holder-position [-13.6 -5 0]))
+(def trrs-holder-size [6.2 13 3]) ; trrs jack PJ-320A
+(def trrs-holder-position  (map + usb-holder-position [-13.6 -4.5 0]))
 (def trrs-holder-thickness 2)
 (def trrs-holder-thickness-2x (* 2 trrs-holder-thickness))
 (def trrs-holder
