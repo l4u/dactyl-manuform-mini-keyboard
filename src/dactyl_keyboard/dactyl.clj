@@ -501,13 +501,13 @@
    (bottom-hull
     (left-key-place cornerrow -1 (translate (wall-locate2 -1 0) web-post))
     (left-key-place cornerrow -1 (translate (wall-locate3 -1 0) web-post))
-    (thumb-bl-place (translate (wall-locate2 -0.3 1) web-post-tr))
-    (thumb-bl-place (translate (wall-locate3 -0.3 1) web-post-tr)))
+    (thumb-tl-place (translate (wall-locate2 0 1) web-post-tl))
+    (thumb-tl-place (translate (wall-locate3 0 1) web-post-tl)))
    (hull
     (left-key-place cornerrow -1 (translate (wall-locate2 -1 0) web-post))
     (left-key-place cornerrow -1 (translate (wall-locate3 -1 0) web-post))
-    (thumb-bl-place (translate (wall-locate2 -0.3 1) web-post-tr))
-    (thumb-bl-place (translate (wall-locate3 -0.3 1) web-post-tr))
+    (thumb-tl-place (translate (wall-locate2 0 1) web-post-tl))
+    (thumb-tl-place (translate (wall-locate3 0 1) web-post-tl))
     (thumb-tl-place thumb-post-tl))
    (hull
     (left-key-place cornerrow -1 web-post)
@@ -520,12 +520,6 @@
     (left-key-place cornerrow -1 (translate (wall-locate1 -1 0) web-post))
     (key-place 0 cornerrow web-post-bl)
     (key-place 0 cornerrow (translate (wall-locate1 -1 0) web-post-bl))
-    (thumb-tl-place thumb-post-tl))
-   (hull
-    (thumb-bl-place web-post-tr)
-    (thumb-bl-place (translate (wall-locate1 -0.3 1) web-post-tr))
-    (thumb-bl-place (translate (wall-locate2 -0.3 1) web-post-tr))
-    (thumb-bl-place (translate (wall-locate3 -0.3 1) web-post-tr))
     (thumb-tl-place thumb-post-tl))))
 
 (def usb-holder-ref (key-position 0 0 (map - (wall-locate2  0  -1) [0 (/ mount-height 2) 0])))
@@ -590,8 +584,7 @@
   (union (screw-insert 0 0         bottom-radius top-radius height [9 10 0])
          (screw-insert 0 lastrow   bottom-radius top-radius height [0 8 0])
          (screw-insert 3 lastrow  bottom-radius top-radius height [9 4 0])
-         (screw-insert 3 0         bottom-radius top-radius height [6 -3 0])
-         ))
+         (screw-insert 3 0         bottom-radius top-radius height [6 -3 0])))
 
 ; Hole Depth Y: 4.4
 (def screw-insert-height 4)
