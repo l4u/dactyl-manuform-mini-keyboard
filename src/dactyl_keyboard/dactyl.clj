@@ -590,7 +590,7 @@
 
   ; circle trrs hole
    (->>
-    (->> (binding [*fn* 30] (cylinder 2.5 20))) ; 5mm trrs jack
+    (->> (binding [*fn* 30] (cylinder 2.55 20))) ; 5mm trrs jack
     (rotate (deg2rad  90) [1 0 0])
     (translate [(first trrs-holder-position) (+ (second trrs-holder-position) (+ wall-thickness (/ (+ (second trrs-holder-size) trrs-holder-thickness) 2))) (+ 3 (/ (+ (last trrs-holder-size) trrs-holder-thickness) 2))])) ;1.5 padding
 
