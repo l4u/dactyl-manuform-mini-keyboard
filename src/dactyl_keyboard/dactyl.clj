@@ -352,7 +352,6 @@
 
 (def thumbcaps
   (union
-   (thumb-1x-layout (sa-cap 1))
    (thumb-15x-layout (rotate (/ π 2) [0 0 1] (sa-cap 1)))))
 
 (def thumb
@@ -624,14 +623,17 @@
 
 (spit "things/right-test.scad"
       (write-scad
-       (union
-        key-holes
-        connectors
-        thumb
-        thumb-connectors
-        case-walls
-        thumbcaps
-        caps)))
+       (difference
+        (union
+         key-holes
+         connectors
+         thumb
+         thumb-connectors
+         case-walls
+         thumbcaps
+         caps)
+
+        (translate [0 0 -20] (cube 350 350 40)))))
 
 (spit "things/right-plate.scad"
       (write-scad
