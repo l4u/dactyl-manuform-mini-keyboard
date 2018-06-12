@@ -66,8 +66,8 @@
 ;; Switch Hole ;;
 ;;;;;;;;;;;;;;;;;
 
-(def keyswitch-height 14.4) ;; Was 14.1, then 14.25
-(def keyswitch-width 14.4)
+(def keyswitch-height 14.2) ;; Was 14.1, then 14.25
+(def keyswitch-width 14.2)
 
 (def sa-profile-key-height 12.7)
 
