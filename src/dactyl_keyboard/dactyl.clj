@@ -114,6 +114,7 @@
 ;;;;;;;;;;;;;;;;
 
 (def sa-length 18.25)
+(def sa-double-length 37.5)
 (def sa-cap {1 (let [bl2 (/ 18.5 2)
                      m (/ 17 2)
                      key-cap (hull (->> (polygon [[bl2 bl2] [bl2 (- bl2)] [(- bl2) (- bl2)] [(- bl2) bl2]])
@@ -302,11 +303,11 @@
 
 (defn thumb-tr-place [shape]
   (->> shape
-       (rotate (deg2rad  14) [1 0 0])
-       (rotate (deg2rad -15) [0 1 0])
-       (rotate (deg2rad  10) [0 0 1]) ; original 10
+       (rotate (deg2rad  10) [1 0 0])
+       (rotate (deg2rad -23) [0 1 0])
+       (rotate (deg2rad  23) [0 0 1]) ; original 10
        (translate thumborigin)
-       (translate [-15 -10 5]))) ; original 1.5u  (translate [-12 -16 3])
+       (translate [-13 -16 4]))) ; original 1.5u  (translate [-12 -16 3])
 (defn thumb-tl-place [shape]
   (->> shape
        (rotate (deg2rad  10) [1 0 0])
@@ -343,23 +344,31 @@
   (union
    (thumb-mr-place shape)
    (thumb-br-place shape)
+   (thumb-tl-place shape)
    (thumb-bl-place shape)))
 
 (defn thumb-15x-layout [shape]
   (union
-   (thumb-tr-place shape)
-   (thumb-tl-place shape)))
+   (thumb-tr-place shape)))
+
+(def larger-plate
+  (let [plate-height (/ (- sa-double-length mount-height) 3)
+        top-plate (->> (cube mount-width plate-height web-thickness)
+                       (translate [0 (/ (+ plate-height mount-height) 2)
+                                   (- plate-thickness (/ web-thickness 2))]))]
+    (union top-plate (mirror [0 1 0] top-plate))))
 
 (def thumbcaps
   (union
    (thumb-1x-layout (sa-cap 1))
-   (thumb-15x-layout (rotate (/ π 2) [0 0 1] (sa-cap 1)))))
+   (thumb-15x-layout (rotate (/ π 2) [0 0 1] (sa-cap 1.5)))))
 
 (def thumb
   (union
    (thumb-1x-layout single-plate)
    (thumb-15x-layout single-plate)
-   (thumb-15x-layout single-plate)))
+   ;(thumb-15x-layout larger-plate)
+))
 
 (def thumb-post-tr (translate [(- (/ mount-width 2) post-adj)  (- (/ mount-height  2) post-adj) 0] web-post))
 (def thumb-post-tl (translate [(+ (/ mount-width -2) post-adj) (- (/ mount-height  2) post-adj) 0] web-post))
@@ -372,18 +381,18 @@
     (thumb-tl-place thumb-post-tr)
     (thumb-tl-place thumb-post-br)
     (thumb-tr-place thumb-post-tl)
+    (thumb-mr-place web-post-tr)
     (thumb-tr-place thumb-post-bl))
    (triangle-hulls    ; bottom two on the right
     (thumb-br-place web-post-tr)
     (thumb-br-place web-post-br)
     (thumb-mr-place web-post-tl)
     (thumb-mr-place web-post-bl))
-
    (triangle-hulls    ; tr, mr and wall
     (thumb-mr-place web-post-tr)
     (thumb-mr-place web-post-br)
+    (thumb-tr-place thumb-post-bl)
     (thumb-tr-place thumb-post-br))
-
    (triangle-hulls    ; centers of the bottom four
     (thumb-br-place web-post-tl)
     (thumb-bl-place web-post-bl)
@@ -400,10 +409,7 @@
     (thumb-mr-place web-post-tr)
     (thumb-tl-place thumb-post-bl)
     (thumb-tl-place thumb-post-br)
-    (thumb-mr-place web-post-tr)
-    (thumb-tr-place thumb-post-bl)
-   ; (thumb-mr-place thumb-post-br)
-    (thumb-tr-place thumb-post-br))
+    (thumb-mr-place web-post-tr))
    (triangle-hulls    ; top two to the main keyboard, starting on the left
     (thumb-tl-place thumb-post-tl)
     (key-place 0 cornerrow web-post-bl)
