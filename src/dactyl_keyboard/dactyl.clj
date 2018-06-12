@@ -303,11 +303,11 @@
 
 (defn thumb-tr-place [shape]
   (->> shape
-       (rotate (deg2rad  10) [1 0 0])
-       (rotate (deg2rad -23) [0 1 0])
-       (rotate (deg2rad  20) [0 0 1]) ; original 10
+       (rotate (deg2rad  14) [1 0 0])
+       (rotate (deg2rad -15) [0 1 0])
+       (rotate (deg2rad  10) [0 0 1]) ; original 10
        (translate thumborigin)
-       (translate [-10 -17 4]))) ; original 1.5u  (translate [-12 -16 3])
+       (translate [-15 -10 5]))) ; original 1.5u  (translate [-12 -16 3])
 (defn thumb-tl-place [shape]
   (->> shape
        (rotate (deg2rad  10) [1 0 0])
@@ -361,18 +361,19 @@
 (def thumbcaps
   (union
    (thumb-1x-layout (sa-cap 1))
-   (thumb-15x-layout (rotate (/ π 2) [0 0 1] (sa-cap 1.5)))))
+   (thumb-15x-layout (rotate (/ π 2) [0 0 1] (sa-cap 1)))))
 
 (def thumb
   (union
    (thumb-1x-layout single-plate)
    (thumb-15x-layout single-plate)
-   (thumb-15x-layout larger-plate)))
+  ; (thumb-15x-layout larger-plate)
+))
 
-(def thumb-post-tr (translate [(- (/ mount-width 2) post-adj)  (- (/ mount-height  1.15) post-adj) 0] web-post))
-(def thumb-post-tl (translate [(+ (/ mount-width -2) post-adj) (- (/ mount-height  1.15) post-adj) 0] web-post))
-(def thumb-post-bl (translate [(+ (/ mount-width -2) post-adj) (+ (/ mount-height -1.15) post-adj) 0] web-post))
-(def thumb-post-br (translate [(- (/ mount-width 2) post-adj)  (+ (/ mount-height -1.15) post-adj) 0] web-post))
+(def thumb-post-tr (translate [(- (/ mount-width 2) post-adj)  (- (/ mount-height  2) post-adj) 0] web-post))
+(def thumb-post-tl (translate [(+ (/ mount-width -2) post-adj) (- (/ mount-height  2) post-adj) 0] web-post))
+(def thumb-post-bl (translate [(+ (/ mount-width -2) post-adj) (+ (/ mount-height -2) post-adj) 0] web-post))
+(def thumb-post-br (translate [(- (/ mount-width 2) post-adj)  (+ (/ mount-height -2) post-adj) 0] web-post))
 
 (def thumb-connectors
   (union
