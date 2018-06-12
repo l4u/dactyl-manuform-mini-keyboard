@@ -303,7 +303,7 @@
 
 (defn thumb-tr-place [shape]
   (->> shape
-       (rotate (deg2rad  8) [1 0 0])
+       (rotate (deg2rad  10) [1 0 0])
        (rotate (deg2rad -23) [0 1 0])
        (rotate (deg2rad  20) [0 0 1]) ; original 10
        (translate thumborigin)
@@ -323,7 +323,7 @@
        (rotate (deg2rad -23) [0 1 0])
        (rotate (deg2rad  25) [0 0 1])
        (translate thumborigin)
-       (translate [-23 -34 -5])))
+       (translate [-23 -34 -6])))
 (defn thumb-br-place [shape]
   (->> shape
        (rotate (deg2rad   6) [1 0 0])
