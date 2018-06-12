@@ -397,6 +397,8 @@
     (thumb-bl-place web-post-tr)
     (thumb-tl-place thumb-post-bl)
     (thumb-bl-place web-post-br)
+    (thumb-mr-place web-post-tr)
+    (thumb-tl-place thumb-post-bl)
     (thumb-tl-place thumb-post-br)
     (thumb-mr-place web-post-tr)
     (thumb-tr-place thumb-post-bl)
