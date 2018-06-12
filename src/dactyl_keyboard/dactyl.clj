@@ -336,7 +336,7 @@
        (rotate (deg2rad -32) [0 1 0])
        (rotate (deg2rad  35) [0 0 1])
        (translate thumborigin)
-       (translate [-51 -25 -12]))) ;        (translate [-51 -25 -12])))
+       (translate [-51 -25 -11.5]))) ;        (translate [-51 -25 -12])))
 
 
 (defn thumb-1x-layout [shape]
