@@ -391,29 +391,28 @@
     (thumb-tl-place web-post-tr)
     (thumb-tl-place web-post-br)
     (thumb-tr-place thumb-post-tl)
-    (thumb-mr-place web-post-tr)
     (thumb-tr-place thumb-post-bl))
-   (triangle-hulls    ; bottom two on the right
+   (triangle-hulls    ; bottom two
     (thumb-br-place web-post-tr)
     (thumb-br-place web-post-br)
     (thumb-mr-place web-post-tl)
     (thumb-mr-place web-post-bl))
-   (triangle-hulls    ; tr, mr and wall
+   (triangle-hulls
     (thumb-mr-place web-post-tr)
-    (thumb-tr-place thumb-post-bl)
-    (thumb-tr-place thumb-post-br)
-    (triangle-hulls
-     (thumb-mr-place web-post-tr)
-     (thumb-mr-place web-post-br)
-     (thumb-tr-place thumb-post-br)))
-   (triangle-hulls    ; centers of the bottom four
+    (thumb-mr-place web-post-br)
+    (thumb-tr-place thumb-post-br))
+   (triangle-hulls    ; between top row and bottom row
     (thumb-br-place web-post-tl)
     (thumb-bl-place web-post-bl)
     (thumb-br-place web-post-tr)
     (thumb-bl-place web-post-br)
     (thumb-mr-place web-post-tl)
+    (thumb-tl-place web-post-bl)
     (thumb-mr-place web-post-tr)
-    (thumb-bl-place web-post-br))
+    (thumb-tl-place web-post-br)
+    (thumb-tr-place web-post-bl)
+    (thumb-mr-place web-post-tr)
+    (thumb-tr-place web-post-br))
    (triangle-hulls    ; top two to the middle two, starting on the left
     (thumb-tl-place web-post-tl)
     (thumb-bl-place web-post-tr)
