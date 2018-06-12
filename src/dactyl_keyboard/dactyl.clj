@@ -617,7 +617,7 @@
 
 (defn screw-insert-all-shapes [bottom-radius top-radius height]
   (union (screw-insert 0 0         bottom-radius top-radius height [9 9 0])
-         (screw-insert 0 lastrow   bottom-radius top-radius height [0 8 0])
+         (screw-insert 0 lastrow   bottom-radius top-radius height [1 8 0])
          (screw-insert 3 lastrow  bottom-radius top-radius height [9 4 0])
          (screw-insert lastcol 0         bottom-radius top-radius height [-3 6 0])
          (screw-insert 1 lastrow         bottom-radius top-radius height [0 -16 0])))
