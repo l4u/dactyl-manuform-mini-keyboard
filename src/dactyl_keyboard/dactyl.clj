@@ -400,9 +400,12 @@
     (thumb-mr-place web-post-bl))
    (triangle-hulls    ; tr, mr and wall
     (thumb-mr-place web-post-tr)
-    (thumb-mr-place web-post-br)
     (thumb-tr-place thumb-post-bl)
-    (thumb-tr-place thumb-post-br))
+    (thumb-tr-place thumb-post-br)
+    (triangle-hulls
+     (thumb-mr-place web-post-tr)
+     (thumb-mr-place web-post-br)
+     (thumb-tr-place thumb-post-br)))
    (triangle-hulls    ; centers of the bottom four
     (thumb-br-place web-post-tl)
     (thumb-bl-place web-post-bl)
