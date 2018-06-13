@@ -274,6 +274,27 @@
          (map (partial apply hull)
               (partition 3 1 shapes))))
 
+(def pinky-connectors
+  (apply union
+         (concat
+          ;; Row connections
+          (for [row (range 0 lastrow)]
+            (triangle-hulls
+             (key-place lastcol row web-post-tr)
+             (key-place lastcol row wide-post-tr)
+             (key-place lastcol row web-post-br)
+             (key-place lastcol row wide-post-br)))
+
+          ;; Column connections
+          (for [row (range 0 cornerrow)]
+            (triangle-hulls
+             (key-place lastcol row web-post-br)
+             (key-place lastcol row wide-post-br)
+             (key-place lastcol (inc row) web-post-tr)
+             (key-place lastcol (inc row) wide-post-tr)))
+
+         )))
+
 (def connectors
   (apply union
          (concat
@@ -302,7 +323,8 @@
              (key-place column row web-post-br)
              (key-place column (inc row) web-post-tr)
              (key-place (inc column) row web-post-bl)
-             (key-place (inc column) (inc row) web-post-tl))))))
+             (key-place (inc column) (inc row) web-post-tl)))
+             )))
 
 ;;;;;;;;;;;;
 ;; Thumbs ;;
@@ -664,6 +686,7 @@
 (def model-right (difference
                   (union
                    key-holes
+                   pinky-connectors
                    connectors
                    thumb
                    thumb-connectors
@@ -690,6 +713,7 @@
        (difference
         (union
          key-holes
+         pinky-connectors
          connectors
          thumb
          thumb-connectors
