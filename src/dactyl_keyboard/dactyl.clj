@@ -595,7 +595,7 @@
 
 (def usb-jack (translate (map + usb-holder-position [0 10 3]) (cube 8 20 3)))
 
-(def pro-micro-position (map + (key-position 0 1 (wall-locate3 -1 0)) [-6 6 -14]))
+(def pro-micro-position (map + (key-position 0 1 (wall-locate3 -1 0)) [-6 6 -16]))
 (def pro-micro-space-size [4 10 12]) ; z has no wall;
 (def pro-micro-wall-thickness 2)
 (def pro-micro-holder-size [(+ pro-micro-wall-thickness (first pro-micro-space-size)) (+ pro-micro-wall-thickness (second pro-micro-space-size)) (last pro-micro-space-size)])
