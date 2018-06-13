@@ -599,12 +599,14 @@
 (def pro-micro-space-size [4 10 12]) ; z has no wall;
 (def pro-micro-wall-thickness 2)
 (def pro-micro-holder-size [(+ pro-micro-wall-thickness (first pro-micro-space-size)) (+ pro-micro-wall-thickness (second pro-micro-space-size)) (last pro-micro-space-size)])
-(def pro-micro-holder
-  (->> (cube (first pro-micro-holder-size) (second pro-micro-holder-size) (last pro-micro-holder-size))
-       (translate [(first pro-micro-position) (second pro-micro-position) (last pro-micro-position)])))
 (def pro-micro-space
   (->> (cube (first pro-micro-space-size) (second pro-micro-space-size) (last pro-micro-space-size))
        (translate [(- (first pro-micro-position) (/ pro-micro-wall-thickness 2)) (- (second pro-micro-position) (/ pro-micro-wall-thickness 2)) (last pro-micro-position)])))
+(def pro-micro-holder
+  (difference
+   (->> (cube (first pro-micro-holder-size) (second pro-micro-holder-size) (last pro-micro-holder-size))
+        (translate [(first pro-micro-position) (second pro-micro-position) (last pro-micro-position)]))
+   pro-micro-space))
 
 (def trrs-holder-size [6.2 10 2]) ; trrs jack PJ-320A
 (def trrs-holder-hole-size [6.2 10 6]) ; trrs jack PJ-320A
@@ -708,7 +710,6 @@
                                       trrs-holder)
                                usb-holder-space
                                usb-jack
-                               pro-micro-space
                                trrs-holder-hole
                                screw-insert-holes))
                   (translate [0 0 -20] (cube 350 350 40))))
