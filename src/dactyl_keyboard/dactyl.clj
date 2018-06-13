@@ -679,14 +679,19 @@
              (key-place lastcol row wide-post-br)
              (key-place lastcol (inc row) web-post-tr)
              (key-place lastcol (inc row) wide-post-tr)))
-         ;; wall
           ;;
 )))
+
+(def pinky-walls
+  (union
+   (key-wall-brace lastcol cornerrow 0 -1 web-post-br lastcol cornerrow 0 -1 wide-post-br)
+   (key-wall-brace lastcol 0 0 1 web-post-tr lastcol 0 0 1 wide-post-tr)))
 
 (def model-right (difference
                   (union
                    key-holes
                    pinky-connectors
+                   pinky-walls
                    connectors
                    thumb
                    thumb-connectors
@@ -714,6 +719,7 @@
         (union
          key-holes
          pinky-connectors
+         pinky-walls
          connectors
          thumb
          thumb-connectors
