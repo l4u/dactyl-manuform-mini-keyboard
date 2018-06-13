@@ -23,7 +23,7 @@
 (def column-style
   (if (> nrows 5) :orthographic :standard))  ; options include :standard, :orthographic, and :fixed
 ; (def column-style :fixed)
-(def pinky-15u false)
+(def pinky-15u true)
 
 (defn column-offset [column] (cond
                                (= column 2) [0 2.82 -4.5]
@@ -649,8 +649,10 @@
 (defn screw-insert-all-shapes [bottom-radius top-radius height]
   (union (screw-insert 0 0         bottom-radius top-radius height [11 10 0])
          (screw-insert 0 lastrow   bottom-radius top-radius height [1 8 0])
-         (screw-insert lastcol lastrow  bottom-radius top-radius height [-5 13 0])
-         (screw-insert lastcol 0         bottom-radius top-radius height [-3 6 0])
+        ;  (screw-insert lastcol lastrow  bottom-radius top-radius height [-5 13 0])
+        ;  (screw-insert lastcol 0         bottom-radius top-radius height [-3 6 0])
+         (screw-insert lastcol lastrow  bottom-radius top-radius height [0 12 0])
+         (screw-insert lastcol 0         bottom-radius top-radius height [0 7 0])
          (screw-insert 1 lastrow         bottom-radius top-radius height [0 -16 0])))
 
 ; Hole Depth Y: 4.4
