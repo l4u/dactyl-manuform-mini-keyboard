@@ -171,7 +171,7 @@
 
 (defn offset-for-column [col]
   (cond
-    (= col lastcol) 20
+    (= col lastcol) 5.5
     :else  0))
 (defn apply-key-geometry [translate-fn rotate-x-fn rotate-y-fn column row shape]
   (let [column-angle (* β (- centercol column))
@@ -264,10 +264,10 @@
 (def web-post-br (translate [(- (/ mount-width 2) post-adj) (+ (/ mount-height -2) post-adj) 0] web-post))
 
 ; wide posts for 1.5u keys in the main cluster
-(def wide-post-tr (translate [(- (/ mount-width 0.81) post-adj)  (- (/ mount-height  2) post-adj) 0] web-post))
-(def wide-post-tl (translate [(+ (/ mount-width -0.81) post-adj) (- (/ mount-height  2) post-adj) 0] web-post))
-(def wide-post-bl (translate [(+ (/ mount-width -0.81) post-adj) (+ (/ mount-height -2) post-adj) 0] web-post))
-(def wide-post-br (translate [(- (/ mount-width 0.81) post-adj)  (+ (/ mount-height -2) post-adj) 0] web-post))
+(def wide-post-tr (translate [(- (/ mount-width 1.2) post-adj)  (- (/ mount-height  2) post-adj) 0] web-post))
+(def wide-post-tl (translate [(+ (/ mount-width -1.2) post-adj) (- (/ mount-height  2) post-adj) 0] web-post))
+(def wide-post-bl (translate [(+ (/ mount-width -1.2) post-adj) (+ (/ mount-height -2) post-adj) 0] web-post))
+(def wide-post-br (translate [(- (/ mount-width 1.2) post-adj)  (+ (/ mount-height -2) post-adj) 0] web-post))
 
 (defn triangle-hulls [& shapes]
   (apply union
