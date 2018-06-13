@@ -244,7 +244,7 @@
                row rows
                :when (or (.contains [2 3] column)
                          (not= row lastrow))]
-           (->> (sa-cap (if (= column 5) 1 1))
+           (->> (sa-cap (if (= column lastcol) 1.5 1))
                 (key-place column row)))))
 
 ;;;;;;;;;;;;;;;;;;;;
