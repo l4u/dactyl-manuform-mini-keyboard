@@ -72,7 +72,7 @@
 
 (def sa-profile-key-height 12.7)
 
-(def plate-thickness 3)
+(def plate-thickness 2)
 (def side-nub-thickness 4)
 (def retention-tab-thickness 1.5)
 (def retention-tab-hole-thickness (- plate-thickness retention-tab-thickness))
@@ -97,7 +97,7 @@
                                              (/ side-nub-thickness 2)])))
                       (translate [0 0 (- plate-thickness side-nub-thickness)]))
         plate-half (union top-wall left-wall (if create-side-nubs? (with-fn 100 side-nub)))
-        top-nub (->> (cube 5 5 (- plate-thickness retention-tab-hole-thickness))
+        top-nub (->> (cube 5 5 retention-tab-hole-thickness)
                      (translate [(+ (/ keyswitch-width 2)) 0 (/ retention-tab-hole-thickness 2)]))
         top-nub-pair (union top-nub
                             (->> top-nub
@@ -251,7 +251,7 @@
 ;; Web Connectors ;;
 ;;;;;;;;;;;;;;;;;;;;
 
-(def web-thickness 3)
+(def web-thickness 2)
 (def post-size 0.1)
 (def web-post (->> (cube post-size post-size web-thickness)
                    (translate [0 0 (+ (/ web-thickness -2)
