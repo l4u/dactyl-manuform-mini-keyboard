@@ -9,3 +9,5 @@
 *.scad
 /target
 *.stl
+*.ai
+*.svg
