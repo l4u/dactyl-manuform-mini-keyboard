@@ -4,20 +4,15 @@ This is a fork of the [Dactyl-ManuForm](https://github.com/tshort/dactyl-keyboar
 
 ## Features
 
-- Sidenub is disabled by default so that Kailh, Outemu and other switches can be
-  used. If you use Cherry MX or Gateron switches, you can enable the sidenubs.
+- The use of sidenubs can be disabled. Sidenub should be disabled if you use Kailh, and Outemu. If you use Cherry MX, Gateron or Zealios switches, you can enable the sidenubs.
+- Spaces for rentention tabs are added.
 - One key in the thumb cluster has been removed. Other thumb keys are also adjusted.
 - The total height is reduced and wire posts are removed. This results in a
   higher printing speed and a lower cost.
 - A TRRS mount instead of a RJ9 mount is used.
 - A micro USB mount is used. A breakout board, or an extension cable can be used.
-- Screw posts are moved inside.
+- Screw posts are moved inside. The holes are designed for TRISERT® thread inserts 145m3.
 - The pro micro holder has been modified. Dupont cables can be used.
-
-## Future plans (PR is welcome)
-
-- Move screw posts 3mm upwards so that the bottom plate can be inserted into the case.
-- Add smoothing.
 
 ## Getting the case and bottom plate
 
@@ -29,15 +24,11 @@ This is a fork of the [Dactyl-ManuForm](https://github.com/tshort/dactyl-keyboar
 * Make changes to design, repeat `load-file`, OpenSCAD will watch for changes and rerender.
 * When done, use OpenSCAD to export STL files
 
-### Option 2: Download from Releases
-
-Generated models (only 4x5) can be downloaded from [Releases](https://github.com/l4u/dactyl-manuform-mini-keyboard/releases).
-
-### Option 3: Download from Thingiverse
+### Option 2: Download from Thingiverse
 
 [Dactyl ManuForm Mini on Thingiverse](https://www.thingiverse.com/l4u/collections/dactyl-manuform-mini)
 
-### Option 4: Order from Shapeways
+### Option 3: Order from Shapeways
 
 [Order from Shapeways](https://www.shapeways.com/shops/l4u)
 
