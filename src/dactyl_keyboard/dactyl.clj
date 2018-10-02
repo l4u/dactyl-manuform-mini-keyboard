@@ -27,7 +27,7 @@
 
 (defn column-offset [column] (cond
                                (= column 2) [0 2.82 -4.5]
-                               (>= column 4) [0 -12 5.64]            ; original [0 -5.8 5.64]
+                               (>= column 4) [0 -5.8 5.64]            ; original [0 -5.8 5.64]
                                :else [0 0 0]))
 
 (def thumb-offsets [6 -3 7])
@@ -233,7 +233,7 @@
   (apply union
          (for [column columns
                row rows
-               :when (or (.contains [2 3] column)
+               :when (or (.contains [2 3 4 5] column)
                          (not= row lastrow))]
            (->> single-plate
                 (key-place column row)))))
@@ -242,7 +242,7 @@
   (apply union
          (for [column columns
                row rows
-               :when (or (.contains [2 3] column)
+               :when (or (.contains [2 3 4 5] column)
                          (not= row lastrow))]
            (->> (sa-cap (if (and (true? pinky-15u) (= column lastcol)) 1.5 1))
                 (key-place column row)))))
@@ -285,7 +285,8 @@
          (concat
           ;; Row connections
           (for [column (range 0 (dec ncols))
-                row (range 0 lastrow)]
+                row rows
+                :when (or (and (not= column 0) (not= column 1)) (not= row lastrow))]
             (triangle-hulls
              (key-place (inc column) row web-post-tl)
              (key-place column row web-post-tr)
@@ -294,7 +295,8 @@
 
           ;; Column connections
           (for [column columns
-                row (range 0 cornerrow)]
+                row (range 0 lastrow)
+                :when (or (and (not= column 0) (not= column 1)) (not= row cornerrow))]
             (triangle-hulls
              (key-place column row web-post-bl)
              (key-place column row web-post-br)
@@ -303,7 +305,8 @@
 
           ;; Diagonal connections
           (for [column (range 0 (dec ncols))
-                row (range 0 cornerrow)]
+                row (range 0 lastrow)
+                :when (or (and (not= column 0) (not= column 1)) (not= row cornerrow))]
             (triangle-hulls
              (key-place column row web-post-br)
              (key-place column (inc row) web-post-tr)
@@ -445,24 +448,18 @@
     (thumb-tr-place thumb-post-br)
     (key-place 2 lastrow web-post-br)
     (key-place 3 lastrow web-post-bl)
-    (key-place 2 lastrow web-post-tr)
-    (key-place 3 lastrow web-post-tl)
-    (key-place 3 cornerrow web-post-bl)
-    (key-place 3 lastrow web-post-tr)
-    (key-place 3 cornerrow web-post-br)
-    (key-place 4 cornerrow web-post-bl))
+    )
    (triangle-hulls
     (key-place 1 cornerrow web-post-br)
     (key-place 2 lastrow web-post-tl)
-    (key-place 2 cornerrow web-post-bl)
-    (key-place 2 lastrow web-post-tr)
-    (key-place 2 cornerrow web-post-br)
-    (key-place 3 cornerrow web-post-bl))
-   (triangle-hulls
-    (key-place 3 lastrow web-post-tr)
-    (key-place 3 lastrow web-post-br)
-    (key-place 3 lastrow web-post-tr)
-    (key-place 4 cornerrow web-post-bl))))
+    (key-place 2 cornerrow web-post-bl))
+   ; final triangular piece
+   ; (triangle-hulls
+   ;  (key-place 3 lastrow web-post-tr)
+   ;  (key-place 3 lastrow web-post-br)
+   ;  (key-place 3 lastrow web-post-tr)
+   ;  (key-place 4 cornerrow web-post-bl))
+    ))
 
 ;;;;;;;;;;
 ;; Case ;;
@@ -514,9 +511,9 @@
   (let [tr (if (true? pinky-15u) wide-post-tr web-post-tr)
         br (if (true? pinky-15u) wide-post-br web-post-br)]
     (union (key-wall-brace lastcol 0 0 1 tr lastcol 0 1 0 tr)
-           (for [y (range 0 lastrow)] (key-wall-brace lastcol y 1 0 tr lastcol y 1 0 br))
-           (for [y (range 1 lastrow)] (key-wall-brace lastcol (dec y) 1 0 br lastcol y 1 0 tr))
-           (key-wall-brace lastcol cornerrow 0 -1 br lastcol cornerrow 1 0 br))))
+           (for [y (range 0 nrows)] (key-wall-brace lastcol y 1 0 tr lastcol y 1 0 br))
+           (for [y (range 1 nrows)] (key-wall-brace lastcol (dec y) 1 0 br lastcol y 1 0 tr))
+           (key-wall-brace lastcol lastrow 0 -1 br lastcol lastrow 1 0 br))))
 
 (def case-walls
   (union
@@ -539,10 +536,10 @@
    (wall-brace (partial key-place 0 0) 0 1 web-post-tl (partial left-key-place 0 1) 0 1 web-post)
    (wall-brace (partial left-key-place 0 1) 0 1 web-post (partial left-key-place 0 1) -1 0 web-post)
    ; front wall
-   (key-wall-brace 3 lastrow   0 -1 web-post-bl 3 lastrow 0.5 -1 web-post-br)
-   (key-wall-brace 3 lastrow 0.5 -1 web-post-br 4 cornerrow 0.5 -1 web-post-bl)
-   (for [x (range 4 ncols)] (key-wall-brace x cornerrow 0 -1 web-post-bl x       cornerrow 0 -1 web-post-br)) ; TODO fix extra wall
-   (for [x (range 5 ncols)] (key-wall-brace x cornerrow 0 -1 web-post-bl (dec x) cornerrow 0 -1 web-post-br))
+   (key-wall-brace 3 lastrow   0 -1 web-post-bl 3 lastrow 0 -1 web-post-br)
+   (key-wall-brace 3 lastrow 0 -1 web-post-br 4 lastrow 0 -1 web-post-bl)
+   (for [x (range 4 ncols)] (key-wall-brace x lastrow 0 -1 web-post-bl x       lastrow 0 -1 web-post-br)) ; TODO fix extra wall
+   (for [x (range 5 ncols)] (key-wall-brace x lastrow 0 -1 web-post-bl (dec x) lastrow 0 -1 web-post-br))
    ; thumb walls
    (wall-brace thumb-mr-place  0 -1 web-post-br thumb-tr-place  0 -1 thumb-post-br)
    (wall-brace thumb-mr-place  0 -1 web-post-br thumb-mr-place  0 -1 web-post-bl)
@@ -653,7 +650,7 @@
          (screw-insert 0 lastrow   bottom-radius top-radius height [0 0 0])
         ;  (screw-insert lastcol lastrow  bottom-radius top-radius height [-5 13 0])
         ;  (screw-insert lastcol 0         bottom-radius top-radius height [-3 6 0])
-         (screw-insert lastcol lastrow  bottom-radius top-radius height [0 12 0])
+         (screw-insert lastcol nrows  bottom-radius top-radius height [0 12 0])
          (screw-insert lastcol 0         bottom-radius top-radius height [0 7 0])
          (screw-insert 1 lastrow         bottom-radius top-radius height [0 -16 0])))
 
@@ -673,7 +670,7 @@
   (apply union
          (concat
           ;; Row connections
-          (for [row (range 0 lastrow)]
+          (for [row rows]
             (triangle-hulls
              (key-place lastcol row web-post-tr)
              (key-place lastcol row wide-post-tr)
@@ -681,7 +678,7 @@
              (key-place lastcol row wide-post-br)))
 
           ;; Column connections
-          (for [row (range 0 cornerrow)]
+          (for [row (range 0 lastrow)]
             (triangle-hulls
              (key-place lastcol row web-post-br)
              (key-place lastcol row wide-post-br)
@@ -692,7 +689,7 @@
 
 (def pinky-walls
   (union
-   (key-wall-brace lastcol cornerrow 0 -1 web-post-br lastcol cornerrow 0 -1 wide-post-br)
+   (key-wall-brace lastcol lastrow 0 -1 web-post-br lastcol lastrow 0 -1 wide-post-br)
    (key-wall-brace lastcol 0 0 1 web-post-tr lastcol 0 0 1 wide-post-tr)))
 
 (def model-right (difference
@@ -711,7 +708,8 @@
                                usb-holder-space
                                usb-jack
                                trrs-holder-hole
-                               screw-insert-holes))
+                               screw-insert-holes)
+                               )
                   (translate [0 0 -20] (cube 350 350 40))))
 
 (spit "things/right.scad"
