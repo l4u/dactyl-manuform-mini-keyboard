@@ -30,7 +30,7 @@ This is a fork of the [Dactyl-ManuForm](https://github.com/tshort/dactyl-keyboar
 
 ### Option 3: Order from Shapeways
 
-[Order from Shapeways](https://www.shapeways.com/shops/l4u)
+[Order from Shapeways](https://www.shapeways.com/shops/beekeeb)
 
 ## License
 
