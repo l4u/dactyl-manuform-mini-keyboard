@@ -2,6 +2,8 @@
 
 This is a fork of the [Dactyl-ManuForm](https://github.com/tshort/dactyl-keyboard). The Dactyl-Manuform is a fork of the [Dactyl](https://github.com/adereth/dactyl-keyboard) with the thumb cluster from [ManuForm](https://github.com/jeffgran/ManuForm).
 
+Build log: https://www.beekeeb.com/dactyl-manuform-mini-mechanical-keyboard-build-log/
+
 ## Forks
 
 - https://github.com/lebastaq/dactyl-manuform-mini-keyboard
@@ -18,9 +20,7 @@ This is a fork of the [Dactyl-ManuForm](https://github.com/tshort/dactyl-keyboar
 - Screw posts are moved inside. The holes are designed for TRISERT® thread inserts 145m3.
 - The pro micro holder has been modified. Dupont cables can be used.
 
-## Getting the case and bottom plate
-
-### Option 1: Generate OpenSCAD and STL models
+## Generate OpenSCAD and STL models
 
 * Run `lein generate` or `lein auto generate`
 * This will regenerate the `things/*.scad` files
@@ -28,13 +28,7 @@ This is a fork of the [Dactyl-ManuForm](https://github.com/tshort/dactyl-keyboar
 * Make changes to design, repeat `load-file`, OpenSCAD will watch for changes and rerender.
 * When done, use OpenSCAD to export STL files
 
-### Option 2: Download from Thingiverse
 
-[Dactyl ManuForm Mini on Thingiverse](https://www.thingiverse.com/l4u/collections/dactyl-manuform-mini)
-
-### Option 3: Order from Shapeways
-
-[Order from Shapeways](https://www.shapeways.com/shops/beekeeb)
 
 ## License
 
