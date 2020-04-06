@@ -12,33 +12,40 @@
 ;; Shape parameters ;;
 ;;;;;;;;;;;;;;;;;;;;;;
 
-(def nrows 5)
+(def nrows 4)
 (def ncols 6)
 
-(def α (/ π 12))                        ; curvature of the columns
-(def β (/ π 36))                        ; curvature of the rows
-(def centerrow (- nrows 3))             ; controls front-back tilt
+(def α (deg2rad 23)) ; 15                        ; curvature of the columns
+(def β (deg2rad 5))     ; 5                   ; curvature of the rows
+(def centerrow 1)             ; controls front-back tilt
 (def centercol 2)                       ; controls left-right tilt / tenting (higher number is more tenting)
-(def tenting-angle (/ π 12))            ; or, change this for more precise tenting control
+(def tenting-angle (deg2rad 15))            ; or, change this for more precise tenting control
 (def column-style
   (if (> nrows 5) :orthographic :standard))  ; options include :standard, :orthographic, and :fixed
 ; (def column-style :fixed)
-(def pinky-15u true)
+(def pinky-15u false)
 
 (defn column-offset [column] (cond
-                               (= column 2) [0 2.82 -4.5]
-                               (>= column 4) [0 -12 5.64]            ; original [0 -5.8 5.64]
+                               (= column 2) [0 2.82 -3]
+                               (>= column 4) [0 -6 5.64]            ; original [0 -5.8 5.64]
                                :else [0 0 0]))
 
 (def thumb-offsets [6 -3 7])
 
 (def keyboard-z-offset 9)               ; controls overall height; original=9 with centercol=3; use 16 for centercol=2
 
-(def extra-width 2.5)                   ; extra space between the base of keys; original= 2
+(def extra-width 2)                   ; extra space between the base of keys; original= 2
 (def extra-height 1.0)                  ; original= 0.5
 
-(def wall-z-offset -5)                 ; original=-15 length of the first downward-sloping part of the wall (negative)
-(def wall-xy-offset 5)                  ; offset in the x and/or y direction for the first downward-sloping part of the wall (negative)
+(def wall-z-offset 0) ; -5                ; original=-15 length of the first downward-sloping part of the wall (negative)
+;(def wall-xy-offset 0.5) ; 2                  ; offset in the x and/or y direction for the first downward-sloping part of the wall (negative)
+(def wall-x-offset 0.5)
+(def wall-y-offset 0.5)
+
+(def left-wall-x-offset 0) ; original 10
+(def left-wall-y-offset 0) ; original 0
+(def left-wall-z-offset  0) ; original 3
+
 (def wall-thickness 2)                  ; wall thickness parameter; originally 5
 
 ;; Settings for column-style == :fixed
@@ -53,7 +60,7 @@
 
 ; If you use Cherry MX or Gateron switches, this can be turned on.
 ; If you use other switches such as Kailh, you should set this as false
-(def create-side-nubs? true)
+(def create-side-nubs? false)
 
 ;;;;;;;;;;;;;;;;;;;;;;;
 ;; General variables ;;
@@ -476,18 +483,16 @@
 (defn bottom-hull [& p]
   (hull p (bottom 0.001 p)))
 
-(def left-wall-x-offset 5) ; original 10
-(def left-wall-z-offset  3) ; original 3
 
 (defn left-key-position [row direction]
-  (map - (key-position 0 row [(* mount-width -0.5) (* direction mount-height 0.5) 0]) [left-wall-x-offset 0 left-wall-z-offset]))
+  (map - (key-position 0 row [(* mount-width -0.5) (* direction mount-height 0.5) 0]) [left-wall-x-offset left-wall-y-offset left-wall-z-offset]))
 
 (defn left-key-place [row direction shape]
   (translate (left-key-position row direction) shape))
 
 (defn wall-locate1 [dx dy] [(* dx wall-thickness) (* dy wall-thickness) -1])
-(defn wall-locate2 [dx dy] [(* dx wall-xy-offset) (* dy wall-xy-offset) wall-z-offset])
-(defn wall-locate3 [dx dy] [(* dx (+ wall-xy-offset wall-thickness)) (* dy (+ wall-xy-offset wall-thickness)) wall-z-offset])
+(defn wall-locate2 [dx dy] [(* dx wall-x-offset) (* dy wall-y-offset) wall-z-offset])
+(defn wall-locate3 [dx dy] [(* dx (+ wall-y-offset wall-thickness)) (* dy (+ wall-y-offset wall-thickness)) wall-z-offset])
 
 (defn wall-brace [place1 dx1 dy1 post1 place2 dx2 dy2 post2]
   (union
@@ -526,16 +531,25 @@
    (for [x (range 1 ncols)] (key-wall-brace x 0 0 1 web-post-tl (dec x) 0 0 1 web-post-tr))
 
    ; left wall
-   (for [y (range 0 lastrow)] (union (wall-brace (partial left-key-place y 1)       -1 0 web-post (partial left-key-place y -1) -1 0 web-post)
-                                     (hull (key-place 0 y web-post-tl)
-                                           (key-place 0 y web-post-bl)
-                                           (left-key-place y  1 web-post)
-                                           (left-key-place y -1 web-post))))
-   (for [y (range 1 lastrow)] (union (wall-brace (partial left-key-place (dec y) -1) -1 0 web-post (partial left-key-place y  1) -1 0 web-post)
-                                     (hull (key-place 0 y       web-post-tl)
-                                           (key-place 0 (dec y) web-post-bl)
-                                           (left-key-place y        1 web-post)
-                                           (left-key-place (dec y) -1 web-post))))
+   ; key rows
+   (for [y (range 0 lastrow)] (union
+                                ; bottom part
+                                (wall-brace (partial left-key-place y 1) -1 0 web-post (partial left-key-place y -1) -1 0 web-post)
+                                ; top part
+                                (hull (key-place 0 y web-post-tl)
+                                      (key-place 0 y web-post-bl)
+                                      (left-key-place y 1 web-post)
+                                      (left-key-place y -1 web-post))))
+   ; in between key rows
+   (for [y (range 1 lastrow)] (union
+                                ; bottom part
+                                (wall-brace (partial left-key-place (dec y) -1) -1 0 web-post (partial left-key-place y 1) -1 0 web-post)
+                                ; top part
+                                (hull (key-place 0 y web-post-tl)
+                                      (key-place 0 (dec y) web-post-bl)
+                                      (left-key-place y 1 web-post)
+                                      (left-key-place (dec y) -1 web-post))))
+   ; left-back-corner
    (wall-brace (partial key-place 0 0) 0 1 web-post-tl (partial left-key-place 0 1) 0 1 web-post)
    (wall-brace (partial left-key-place 0 1) 0 1 web-post (partial left-key-place 0 1) -1 0 web-post)
    ; front wall
@@ -596,7 +610,7 @@
 
 (def usb-jack (translate (map + usb-holder-position [0 10 3]) (cube 8.1 20 3.1)))
 
-(def pro-micro-position (map + (key-position 0 1 (wall-locate3 -1 0)) [-6 2 -15]))
+(def pro-micro-position (map + (key-position 0 1 (wall-locate3 -1 0)) [-3 2 -15]))
 (def pro-micro-space-size [4 10 12]) ; z has no wall;
 (def pro-micro-wall-thickness 2)
 (def pro-micro-holder-size [(+ pro-micro-wall-thickness (first pro-micro-space-size)) (+ pro-micro-wall-thickness (second pro-micro-space-size)) (last pro-micro-space-size)])
@@ -653,9 +667,9 @@
          (screw-insert 0 lastrow   bottom-radius top-radius height [0 0 0])
         ;  (screw-insert lastcol lastrow  bottom-radius top-radius height [-5 13 0])
         ;  (screw-insert lastcol 0         bottom-radius top-radius height [-3 6 0])
-         (screw-insert lastcol lastrow  bottom-radius top-radius height [0 12 0])
-         (screw-insert lastcol 0         bottom-radius top-radius height [0 7 0])
-         (screw-insert 1 lastrow         bottom-radius top-radius height [0 -16 0])))
+         (screw-insert lastcol lastrow  bottom-radius top-radius height (if pinky-15u [0 12 0] [-5 12 0])) ; -5 12
+         (screw-insert lastcol 0        bottom-radius top-radius height (if pinky-15u [0 7 0] [-4 8 0])) ; -5 7
+         (screw-insert 1 lastrow        bottom-radius top-radius height [0 -16 0])))
 
 ; Hole Depth Y: 4.4
 (def screw-insert-height 4)
@@ -704,14 +718,16 @@
                    thumb
                    thumb-connectors
                    (difference (union case-walls
-                                      screw-insert-outers
+                                      ;screw-insert-outers
                                       pro-micro-holder
-                                      usb-holder-holder
-                                      trrs-holder)
-                               usb-holder-space
-                               usb-jack
-                               trrs-holder-hole
-                               screw-insert-holes))
+                                      ;usb-holder-holder
+                                      ;trrs-holder
+                                      )
+                               ;usb-holder-space
+                               ;usb-jack
+                               ;trrs-holder-hole
+                               ;screw-insert-holes
+                               ))
                   (translate [0 0 -20] (cube 350 350 40))))
 
 (spit "things/right.scad"
