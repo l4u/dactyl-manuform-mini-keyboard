@@ -11,3 +11,5 @@
 *.stl
 *.ai
 *.svg
+/.idea/
+/dactyl-manuform-mini-keyboard.iml
