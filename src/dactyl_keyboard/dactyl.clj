@@ -288,6 +288,7 @@
       (def wide-post-bl web-post-bl)
       (def wide-post-br web-post-br)))
 
+
 (defn triangle-hulls [& shapes]
   (apply union
          (map (partial apply hull)
@@ -348,6 +349,10 @@
 (defn thumb-m-place [shape] (thumb-place [10 -23 25] [-35 -16 -2] shape)) ; middle
 (defn thumb-l-place [shape] (thumb-place [6 -32 35] [-51 -25 -11.5] shape)) ; left
 
+(defn thumb-r-place [shape] (thumb-place [14 -32 10] [-15 -10 5] shape)) ; right
+(defn thumb-m-place [shape] (thumb-place [10 -23 20] [-33 -15 -4.5] shape)) ; middle
+(defn thumb-l-place [shape] (thumb-place [6 -15 35] [-51.5 -24.5 -11.5] shape)) ; left
+
 (defn thumb-layout [shape]
   (union
     (thumb-r-place shape)
@@ -362,25 +367,35 @@
 
 (def thumb (thumb-layout single-plate))
 
-(def thumb-post-tr (translate [(- (/ mount-width 2) post-adj) (- (/ mount-height 2) post-adj) 0] web-post))
-(def thumb-post-tl (translate [(+ (/ mount-width -2) post-adj) (- (/ mount-height 2) post-adj) 0] web-post))
-(def thumb-post-bl (translate [(+ (/ mount-width -2) post-adj) (+ (/ mount-height -2) post-adj) 0] web-post))
-(def thumb-post-br (translate [(- (/ mount-width 2) post-adj) (+ (/ mount-height -2) post-adj) 0] web-post))
+;;;;;;;;;;
+;; Case ;;
+;;;;;;;;;;
+
+(defn bottom [height p]
+  (->> (project p)
+       (extrude-linear {:height height :twist 0 :convexity 0})
+       (translate [0 0 (- (/ height 2) 10)])))
+
+(defn bottom-hull [& p]
+  (hull p (bottom 0.001 p)))
+
+(defn wall-locate1 [dx dy] [(* dx wall-thickness) (* dy wall-thickness) -1])
+(defn wall-locate2 [dx dy] [(* dx wall-xy-offset) (* dy wall-xy-offset) wall-z-offset])
+(defn wall-locate3 [dx dy] [(* dx (+ wall-xy-offset wall-thickness)) (* dy (+ wall-xy-offset wall-thickness)) wall-z-offset])
 
 (def thumb-connectors
   (union
     (triangle-hulls                                         ; top two
       (thumb-m-place web-post-tr)
       (thumb-m-place web-post-br)
-      (thumb-r-place thumb-post-tl)
-      (thumb-r-place thumb-post-bl))
+      (thumb-r-place web-post-tl)
+      (thumb-r-place web-post-bl))
     (triangle-hulls                                         ; top two
       (thumb-m-place web-post-tl)
       (thumb-l-place web-post-tr)
       (thumb-m-place web-post-bl)
       (thumb-l-place web-post-br)
-      (thumb-m-place web-post-bl)
-      (thumb-m-place web-post-br))
+      (thumb-m-place web-post-bl))
     (triangle-hulls                                         ; top two to the main keyboard, starting on the left
       (key-place 2 lastrow web-post-br)
       (key-place 3 lastrow web-post-bl)
@@ -404,7 +419,7 @@
       (key-place 4 cornerrow web-post-bl))
     (hull                                                   ; between thumb m and top key
       (key-place 0 cornerrow (translate (wall-locate3 -1 0) web-post-bl))
-      (thumb-m-place (translate (wall-locate2 0 1) web-post-tl))
+      ;(thumb-m-place (translate (wall-locate2 0 1) web-post-tl))
       (thumb-m-place web-post-tr)
       (thumb-m-place web-post-tl))
     (piramid-hulls                                          ; top ridge thumb side
@@ -434,22 +449,6 @@
       (key-place 3 lastrow web-post-bl)
       (key-place 2 lastrow web-post-br)
       )))
-
-;;;;;;;;;;
-;; Case ;;
-;;;;;;;;;;
-
-(defn bottom [height p]
-  (->> (project p)
-       (extrude-linear {:height height :twist 0 :convexity 0})
-       (translate [0 0 (- (/ height 2) 10)])))
-
-(defn bottom-hull [& p]
-  (hull p (bottom 0.001 p)))
-
-(defn wall-locate1 [dx dy] [(* dx wall-thickness) (* dy wall-thickness) -1])
-(defn wall-locate2 [dx dy] [(* dx wall-xy-offset) (* dy wall-xy-offset) wall-z-offset])
-(defn wall-locate3 [dx dy] [(* dx (+ wall-xy-offset wall-thickness)) (* dy (+ wall-xy-offset wall-thickness)) wall-z-offset])
 
 ; dx1, dy1, dx2, dy2 = direction of the wall. '1' for front, '-1' for back, '0' for 'not in this direction'.
 ; place1, place2 = function that places an object at a location, typically refers to the center of a key position.
@@ -502,7 +501,7 @@
     (for [x (range 4 ncols)] (key-wall-brace x cornerrow 0 -1 web-post-bl x cornerrow 0 -1 web-post-br)) ; TODO fix extra wall
     (for [x (range 5 ncols)] (key-wall-brace x cornerrow 0 -1 web-post-bl (dec x) cornerrow 0 -1 web-post-br))
     ; thumb walls
-    (wall-brace thumb-m-place 0 -1 web-post-br thumb-r-place 0 -1 thumb-post-br)
+    (wall-brace thumb-r-place 0 -1 web-post-br thumb-r-place 0 -1 web-post-bl)
     (wall-brace thumb-m-place 0 -1 web-post-br thumb-m-place 0 -1 web-post-bl)
     (wall-brace thumb-l-place 0 -1 web-post-br thumb-l-place 0 -1 web-post-bl)
     (wall-brace thumb-l-place 0 1 web-post-tr thumb-l-place 0 1 web-post-tl)
@@ -511,10 +510,11 @@
     (wall-brace thumb-l-place -1 0 web-post-bl thumb-l-place 0 -1 web-post-bl)
     (wall-brace thumb-l-place -1 0 web-post-tl thumb-l-place 0 1 web-post-tl)
     ; thumb tweeners
+    (wall-brace thumb-r-place 0 -1 web-post-bl thumb-m-place 0 -1 web-post-br)
+    (wall-brace thumb-r-place 0 -1 web-post-br (partial key-place 3 lastrow) 0 -1 web-post-bl)
     (wall-brace thumb-m-place 0 -1 web-post-bl thumb-l-place 0 -1 web-post-br)
     (wall-brace thumb-m-place 0 1 web-post-tl thumb-l-place 0 1 web-post-tr)
     (wall-brace thumb-l-place -1 0 web-post-bl thumb-l-place -1 0 web-post-tl)
-    (wall-brace thumb-r-place 0 -1 thumb-post-br (partial key-place 3 lastrow) 0 -1 web-post-bl)
     ))
 
 (def usb-holder-ref (key-position 0 0 (map - (wall-locate2 0 -1) [0 (/ mount-height 2) 0])))
@@ -657,10 +657,11 @@
       (write-scad
         (difference
           (union
-            key-holes
-            connectors
+            ;key-holes
+            ;connectors
             thumb
             thumb-connectors
+            thumbcaps
             case-walls
             )
           (translate [0 0 -20] (cube 350 350 40)))))
