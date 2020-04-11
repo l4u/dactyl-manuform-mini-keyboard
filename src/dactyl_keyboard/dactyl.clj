@@ -36,7 +36,7 @@
 (def extra-width 2)                                         ; extra space between the base of keys; original= 2
 (def extra-height 0.5)                                      ; original= 0.5
 
-(def wall-z-offset 0)                                    ; -5                ; original=-15 length of the first downward-sloping part of the wall (negative)
+(def wall-z-offset -3)                                    ; -5                ; original=-15 length of the first downward-sloping part of the wall (negative)
 (def wall-xy-offset 2)
 
 (def wall-thickness 2)                                      ; wall thickness parameter; originally 5
@@ -423,11 +423,14 @@
       (thumb-m-place web-post-tr)
       (thumb-m-place web-post-tl))
     (piramid-hulls                                          ; top ridge thumb side
-      (key-place 0 cornerrow (translate (wall-locate3 -1 0) web-post-bl))
+      (key-place 0 cornerrow (translate (wall-locate1 -1 0) web-post-bl))
+      (key-place 0 cornerrow (translate (wall-locate2 -1 0) web-post-bl))
       (key-place 0 cornerrow web-post-bl)
       (thumb-r-place web-post-tr)
       (thumb-r-place web-post-tl)
-      (thumb-m-place web-post-tr))
+      (thumb-m-place web-post-tr)
+      (key-place 0 cornerrow (translate (wall-locate3 -1 0) web-post-bl))
+      )
     (hull
       (thumb-r-place web-post-tr)                           ; top ridge finger side
       (thumb-r-place web-post-tl)  ; need extra thickness otherwise wall gets thinner than a single extrusion
@@ -435,20 +438,20 @@
       (key-place 0 cornerrow web-post-br))
     (piramid-hulls                                          ; infill between top ridge and fingers
       (thumb-r-place fat-web-post-tr)
-      ;(key-place 0 cornerrow web-post-bl)
       (key-place 0 cornerrow web-post-br)
       (key-place 1 cornerrow web-post-bl)
       (key-place 1 cornerrow web-post-br)
-      (key-place 2 lastrow web-post-tl)
-      (key-place 2 lastrow web-post-bl)
+      (key-place 1 lastrow web-post-br) ; this key doesn't actually exist, it's below the thumb
+      (key-place 1 lastrow (translate (wall-locate1 0 -1) web-post-br))
       (thumb-r-place web-post-br))
-    (piramid-hulls                                          ; between thumb and front wall
+    (triangle-hulls
+      (key-place 2 lastrow web-post-tl)
+      (key-place 1 cornerrow web-post-br)
       (key-place 2 lastrow web-post-bl)
-      (thumb-r-place web-post-br)
-      (key-place 3 lastrow (translate (wall-locate3 0 -1) web-post-bl))
-      (key-place 3 lastrow web-post-bl)
+      (key-place 1 lastrow web-post-br)
       (key-place 2 lastrow web-post-br)
-      )))
+      (key-place 3 lastrow web-post-bl))
+    ))
 
 ; dx1, dy1, dx2, dy2 = direction of the wall. '1' for front, '-1' for back, '0' for 'not in this direction'.
 ; place1, place2 = function that places an object at a location, typically refers to the center of a key position.
@@ -500,6 +503,8 @@
     (key-wall-brace 3 lastrow 0.5 -1 web-post-br 4 cornerrow 0.5 -1 web-post-bl)
     (for [x (range 4 ncols)] (key-wall-brace x cornerrow 0 -1 web-post-bl x cornerrow 0 -1 web-post-br)) ; TODO fix extra wall
     (for [x (range 5 ncols)] (key-wall-brace x cornerrow 0 -1 web-post-bl (dec x) cornerrow 0 -1 web-post-br))
+    (key-wall-brace 3 lastrow 0 -1 web-post-bl 1 lastrow 0 -1 web-post-br)
+    (wall-brace thumb-r-place 0 -1 web-post-br (partial key-place 1 lastrow) 0 -1 web-post-br)
     ; thumb walls
     (wall-brace thumb-r-place 0 -1 web-post-br thumb-r-place 0 -1 web-post-bl)
     (wall-brace thumb-m-place 0 -1 web-post-br thumb-m-place 0 -1 web-post-bl)
@@ -511,7 +516,6 @@
     (wall-brace thumb-l-place -1 0 web-post-tl thumb-l-place 0 1 web-post-tl)
     ; thumb tweeners
     (wall-brace thumb-r-place 0 -1 web-post-bl thumb-m-place 0 -1 web-post-br)
-    (wall-brace thumb-r-place 0 -1 web-post-br (partial key-place 3 lastrow) 0 -1 web-post-bl)
     (wall-brace thumb-m-place 0 -1 web-post-bl thumb-l-place 0 -1 web-post-br)
     (wall-brace thumb-m-place 0 1 web-post-tl thumb-l-place 0 1 web-post-tr)
     (wall-brace thumb-l-place -1 0 web-post-bl thumb-l-place -1 0 web-post-tl)
@@ -657,11 +661,10 @@
       (write-scad
         (difference
           (union
-            ;key-holes
-            ;connectors
+            key-holes
+            connectors
             thumb
             thumb-connectors
-            thumbcaps
             case-walls
             )
           (translate [0 0 -20] (cube 350 350 40)))))
