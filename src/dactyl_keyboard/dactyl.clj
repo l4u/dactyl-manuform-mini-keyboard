@@ -34,16 +34,10 @@
 (def keyboard-z-offset 9)                                   ; controls overall height; original=9 with centercol=3; use 16 for centercol=2
 
 (def extra-width 2)                                         ; extra space between the base of keys; original= 2
-(def extra-height 1.0)                                      ; original= 0.5
+(def extra-height 0.5)                                      ; original= 0.5
 
-(def wall-z-offset -0.5)                                    ; -5                ; original=-15 length of the first downward-sloping part of the wall (negative)
-;(def wall-xy-offset 0.5) ; 2                  ; offset in the x and/or y direction for the first downward-sloping part of the wall (negative)
-(def wall-x-offset 0.5)
-(def wall-y-offset 0.5)
-
-(def left-wall-x-offset 0)                                  ; original 10
-(def left-wall-y-offset 0)                                  ; original 0
-(def left-wall-z-offset 0)                                  ; original 3
+(def wall-z-offset 0)                                    ; -5                ; original=-15 length of the first downward-sloping part of the wall (negative)
+(def wall-xy-offset 2)
 
 (def wall-thickness 2)                                      ; wall thickness parameter; originally 5
 
@@ -73,8 +67,8 @@
 ;; Switch Hole ;;
 ;;;;;;;;;;;;;;;;;
 
-(def keyswitch-height 14.2)                                 ;; Was 14.1, then 14.25
-(def keyswitch-width 14.2)
+(def keyswitch-height 14.1)                                 ;; Was 14.1, then 14.25
+(def keyswitch-width 14.1)
 
 (def sa-profile-key-height 12.7)
 
@@ -276,8 +270,8 @@
 ; fat web post for very steep angles between thumb and finger clusters
 ; this ensures the walls stay somewhat thicker
 (def fat-post-size 1.2)
-(def fat-web-post (->> (cube fat-post-size fat-post-size fat-post-size)
-                       (translate [0 0 (+ (/ fat-post-size -2)
+(def fat-web-post (->> (cube fat-post-size fat-post-size web-thickness)
+                       (translate [0 0 (+ (/ web-thickness -2)
                                           plate-thickness)])))
 
 (def fat-post-adj (/ fat-post-size 2))
@@ -361,6 +355,8 @@
     (thumb-l-place shape)
     ))
 
+(defn debug [shape]
+  (color [0.5 0.5 0.5 0.5] shape))
 
 (def thumbcaps (thumb-layout (sa-cap 1)))
 
@@ -407,22 +403,24 @@
       (key-place 3 lastrow web-post-tr)
       (key-place 4 cornerrow web-post-bl))
     (hull                                                   ; between thumb m and top key
-      (left-key-place cornerrow -1 web-post)
+      (key-place 0 cornerrow (translate (wall-locate3 -1 0) web-post-bl))
       (thumb-m-place (translate (wall-locate2 0 1) web-post-tl))
       (thumb-m-place web-post-tr)
       (thumb-m-place web-post-tl))
     (piramid-hulls                                          ; top ridge thumb side
-      (left-key-place cornerrow -1 web-post)
+      (key-place 0 cornerrow (translate (wall-locate3 -1 0) web-post-bl))
+      (key-place 0 cornerrow web-post-bl)
       (thumb-r-place web-post-tr)
       (thumb-r-place web-post-tl)
       (thumb-m-place web-post-tr))
-    (piramid-hulls
+    (hull
       (thumb-r-place web-post-tr)                           ; top ridge finger side
-      (left-key-place cornerrow -1 web-post)
+      (thumb-r-place web-post-tl)  ; need extra thickness otherwise wall gets thinner than a single extrusion
       (key-place 0 cornerrow web-post-bl)
       (key-place 0 cornerrow web-post-br))
     (piramid-hulls                                          ; infill between top ridge and fingers
       (thumb-r-place fat-web-post-tr)
+      ;(key-place 0 cornerrow web-post-bl)
       (key-place 0 cornerrow web-post-br)
       (key-place 1 cornerrow web-post-bl)
       (key-place 1 cornerrow web-post-br)
@@ -449,20 +447,13 @@
 (defn bottom-hull [& p]
   (hull p (bottom 0.001 p)))
 
-
-(defn left-key-position [row direction]
-  (map - (key-position 0 row [(* mount-width -0.5) (* direction mount-height 0.5) 0]) [left-wall-x-offset left-wall-y-offset left-wall-z-offset]))
-
-(defn left-key-place [row direction shape]
-  (translate (left-key-position row direction) shape))
-
 (defn wall-locate1 [dx dy] [(* dx wall-thickness) (* dy wall-thickness) -1])
-(defn wall-locate2 [dx dy] [(* dx wall-x-offset) (* dy wall-y-offset) wall-z-offset])
-(defn wall-locate3 [dx dy] [(* dx (+ wall-y-offset wall-thickness)) (* dy (+ wall-y-offset wall-thickness)) wall-z-offset])
+(defn wall-locate2 [dx dy] [(* dx wall-xy-offset) (* dy wall-xy-offset) wall-z-offset])
+(defn wall-locate3 [dx dy] [(* dx (+ wall-xy-offset wall-thickness)) (* dy (+ wall-xy-offset wall-thickness)) wall-z-offset])
 
 ; dx1, dy1, dx2, dy2 = direction of the wall. '1' for front, '-1' for back, '0' for 'not in this direction'.
 ; place1, place2 = function that places an object at a location, typically refers to the center of a key position.
-; post1, post2 = the
+; post1, post2 = the shape that should be rendered
 (defn wall-brace [place1 dx1 dy1 post1 place2 dx2 dy2 post2]
   (union
     (hull
@@ -499,19 +490,12 @@
     ; back wall
     (for [x (range 0 ncols)] (key-wall-brace x 0 0 1 web-post-tl x 0 0 1 web-post-tr))
     (for [x (range 1 ncols)] (key-wall-brace x 0 0 1 web-post-tl (dec x) 0 0 1 web-post-tr))
-
     ; left wall
-    (for [y (range 0 lastrow)]
-      (union
-        (wall-brace (partial left-key-place y 1) -1 0 web-post (partial left-key-place y -1) -1 0 web-post)
-        (hull (key-place 0 y web-post-tl) (key-place 0 y web-post-bl) (left-key-place y 1 web-post) (left-key-place y -1 web-post))))
-    (for [y (range 1 lastrow)]
-      (union
-        (wall-brace (partial left-key-place (dec y) -1) -1 0 web-post (partial left-key-place y 1) -1 0 web-post)
-        (hull (key-place 0 y web-post-tl) (key-place 0 (dec y) web-post-bl) (left-key-place y 1 web-post) (left-key-place (dec y) -1 web-post))))
+    (for [y (range 0 lastrow)] (key-wall-brace 0 y -1 0 web-post-tl 0 y -1 0 web-post-bl))
+    (for [y (range 1 lastrow)] (key-wall-brace 0 (dec y) -1 0 web-post-bl 0 y -1 0 web-post-tl))
+    (wall-brace (partial key-place 0 cornerrow) -1 0 web-post-bl thumb-m-place 0 1 web-post-tl)
     ; left-back-corner
-    (wall-brace (partial key-place 0 0) 0 1 web-post-tl (partial left-key-place 0 1) 0 1 web-post)
-    (wall-brace (partial left-key-place 0 1) 0 1 web-post (partial left-key-place 0 1) -1 0 web-post)
+    (key-wall-brace 0 0 0 1 web-post-tl 0 0 -1 0 web-post-tl)
     ; front wall
     (key-wall-brace 3 lastrow 0 -1 web-post-bl 3 lastrow 0.5 -1 web-post-br)
     (key-wall-brace 3 lastrow 0.5 -1 web-post-br 4 cornerrow 0.5 -1 web-post-bl)
@@ -531,12 +515,6 @@
     (wall-brace thumb-m-place 0 1 web-post-tl thumb-l-place 0 1 web-post-tr)
     (wall-brace thumb-l-place -1 0 web-post-bl thumb-l-place -1 0 web-post-tl)
     (wall-brace thumb-r-place 0 -1 thumb-post-br (partial key-place 3 lastrow) 0 -1 web-post-bl)
-    ; inner corner between left wall and thumb
-    (bottom-hull                                            ; inner corner wall down
-      (left-key-place cornerrow -1 web-post)
-      (left-key-place cornerrow -1 (translate (wall-locate3 -1 0) web-post))
-      (thumb-m-place web-post-tl)
-      (thumb-m-place (translate (wall-locate3 0 1) web-post-tl)))
     ))
 
 (def usb-holder-ref (key-position 0 0 (map - (wall-locate2 0 -1) [0 (/ mount-height 2) 0])))
@@ -595,7 +573,7 @@
         shift-down (and (not (or shift-right shift-left)) (>= row lastrow))
         position (if shift-up (key-position column row (map + (wall-locate2 0 1) [0 (/ mount-height 2) 0]))
                               (if shift-down (key-position column row (map - (wall-locate2 0 -1) [0 (/ mount-height 2) 0]))
-                                             (if shift-left (map + (left-key-position row 0) (wall-locate3 -1 0))
+                                             (if shift-left (key-position column row (map - (wall-locate2 -1 0) [(/ mount-width 2) 0 0]))
                                                             (key-position column row (map + (wall-locate2 1 0) [(/ mount-width 2) 0 0])))))]
     (->> (screw-insert-shape bottom-radius top-radius height)
          (translate (map + offset [(first position) (second position) (/ height 2)])))))
