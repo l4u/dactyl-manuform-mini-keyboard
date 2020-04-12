@@ -15,8 +15,8 @@
 (def ncols 6)
 
 (def α (deg2rad 20))                                        ; 15                        ; curvature of the columns
-(def β (deg2rad 5))                                         ; 5                   ; curvature of the rows
-(def centerrow (- nrows 3))                                           ; controls front-back tilt
+(def β (deg2rad 6))                                         ; 5                   ; curvature of the rows
+(def centerrow (- nrows 2.5))                                           ; controls front-back tilt
 (def centercol 2)                                           ; controls left-right tilt / tenting (higher number is more tenting)
 (def tenting-angle (deg2rad 15))                            ; or, change this for more precise tenting control
 (def column-style
@@ -25,15 +25,16 @@
 (def pinky-15u false)
 
 (defn column-offset [column] (cond
-                               (= column 2) [0 2.82 -3]
-                               (>= column 4) [0 -6 5.64]    ; original [0 -5.8 5.64]
+                               (= column 2) [0 5 -3]
+                               (= column 3) [0 0 -1.5]
+                               (>= column 4) [0 -10 6]    ; original [0 -5.8 5.64]
                                :else [0 0 0]))
 
 (def thumb-offsets [6 -3 7])
 
 (def keyboard-z-offset 9)                                   ; controls overall height; original=9 with centercol=3; use 16 for centercol=2
 
-(def extra-width 2)                                         ; extra space between the base of keys; original= 2
+(def extra-width 2.5)                                         ; extra space between the base of keys; original= 2
 (def extra-height 0.5)                                      ; original= 0.5
 
 (def wall-z-offset -3)                                    ; -5                ; original=-15 length of the first downward-sloping part of the wall (negative)
@@ -418,8 +419,7 @@
       (key-place 3 lastrow web-post-tr)
       (key-place 4 cornerrow web-post-bl))
     (hull                                                   ; between thumb m and top key
-      (key-place 0 cornerrow (translate (wall-locate3 -1 0) web-post-bl))
-      ;(thumb-m-place (translate (wall-locate2 0 1) web-post-tl))
+      (key-place 0 cornerrow (translate (wall-locate1 -1 0) web-post-bl))
       (thumb-m-place web-post-tr)
       (thumb-m-place web-post-tl))
     (piramid-hulls                                          ; top ridge thumb side
@@ -441,14 +441,12 @@
       (key-place 0 cornerrow web-post-br)
       (key-place 1 cornerrow web-post-bl)
       (key-place 1 cornerrow web-post-br)
-      (key-place 1 lastrow web-post-br) ; this key doesn't actually exist, it's below the thumb
-      (key-place 1 lastrow (translate (wall-locate1 0 -1) web-post-br))
       (thumb-r-place web-post-br))
     (triangle-hulls
       (key-place 2 lastrow web-post-tl)
       (key-place 1 cornerrow web-post-br)
       (key-place 2 lastrow web-post-bl)
-      (key-place 1 lastrow web-post-br)
+      (thumb-r-place web-post-br)
       (key-place 2 lastrow web-post-br)
       (key-place 3 lastrow web-post-bl))
     ))
@@ -503,8 +501,7 @@
     (key-wall-brace 3 lastrow 0.5 -1 web-post-br 4 cornerrow 0.5 -1 web-post-bl)
     (for [x (range 4 ncols)] (key-wall-brace x cornerrow 0 -1 web-post-bl x cornerrow 0 -1 web-post-br)) ; TODO fix extra wall
     (for [x (range 5 ncols)] (key-wall-brace x cornerrow 0 -1 web-post-bl (dec x) cornerrow 0 -1 web-post-br))
-    (key-wall-brace 3 lastrow 0 -1 web-post-bl 1 lastrow 0 -1 web-post-br)
-    (wall-brace thumb-r-place 0 -1 web-post-br (partial key-place 1 lastrow) 0 -1 web-post-br)
+    (wall-brace thumb-r-place 0 -1 web-post-br (partial key-place 3 lastrow) 0 -1 web-post-bl)
     ; thumb walls
     (wall-brace thumb-r-place 0 -1 web-post-br thumb-r-place 0 -1 web-post-bl)
     (wall-brace thumb-m-place 0 -1 web-post-br thumb-m-place 0 -1 web-post-bl)
