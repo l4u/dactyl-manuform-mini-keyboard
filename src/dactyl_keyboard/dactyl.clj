@@ -14,43 +14,30 @@
 (def nrows 4)
 (def ncols 6)
 
-(def α (deg2rad 20))                                        ; 15                        ; curvature of the columns
-(def β (deg2rad 6))                                         ; 5                   ; curvature of the rows
-(def centerrow (- nrows 2.5))                                           ; controls front-back tilt
-(def centercol 2)                                           ; controls left-right tilt / tenting (higher number is more tenting)
+(def column-curvature (deg2rad 17))                         ; 15                        ; curvature of the columns
+(def row-curvature (deg2rad 6))                             ; 5                   ; curvature of the rows
+(def centerrow (- nrows 2.75))                              ; controls front-back tilt
+(def centercol 3)                                           ; controls left-right tilt / tenting (higher number is more tenting)
 (def tenting-angle (deg2rad 15))                            ; or, change this for more precise tenting control
 (def column-style
-  (if (> nrows 5) :orthographic :standard))                 ; options include :standard, :orthographic, and :fixed
-; (def column-style :fixed)
-(def pinky-15u false)
-
+  (if (> nrows 5) :orthographic :standard))
 (defn column-offset [column] (cond
                                (= column 2) [0 5 -3]
                                (= column 3) [0 0 -1.5]
-                               (>= column 4) [0 -10 6]    ; original [0 -5.8 5.64]
+                               (>= column 4) [0 -10 6]
                                :else [0 0 0]))
 
 (def thumb-offsets [6 -3 7])
 
 (def keyboard-z-offset 9)                                   ; controls overall height; original=9 with centercol=3; use 16 for centercol=2
 
-(def extra-width 2.5)                                         ; extra space between the base of keys; original= 2
+(def extra-width 2.5)                                       ; extra space between the base of keys; original= 2
 (def extra-height 0.5)                                      ; original= 0.5
 
-(def wall-z-offset -3)                                    ; -5                ; original=-15 length of the first downward-sloping part of the wall (negative)
-(def wall-xy-offset 2)
+(def wall-z-offset -1)                                      ; -5                ; original=-15 length of the first downward-sloping part of the wall (negative)
+(def wall-xy-offset 1)
 
 (def wall-thickness 2)                                      ; wall thickness parameter; originally 5
-
-;; Settings for column-style == :fixed
-;; The defaults roughly match Maltron settings
-;;   http://patentimages.storage.googleapis.com/EP0219944A2/imgf0002.png
-;; Fixed-z overrides the z portion of the column ofsets above.
-;; NOTE: THIS DOESN'T WORK QUITE LIKE I'D HOPED.
-(def fixed-angles [(deg2rad 10) (deg2rad 10) 0 0 0 (deg2rad -15) (deg2rad -15)])
-(def fixed-x [-41.5 -22.5 0 20.3 41.4 65.5 89.6])           ; relative to the middle finger
-(def fixed-z [12.1 8.3 0 5 10.7 14.5 17.5])
-(def fixed-tenting (deg2rad 0))
 
 ; If you use Cherry MX or Gateron switches, this can be turned on.
 ; If you use other switches such as Kailh, you should set this as false
@@ -70,10 +57,11 @@
 
 (def keyswitch-height 14.1)                                 ;; Was 14.1, then 14.25
 (def keyswitch-width 14.1)
+(def plate-thickness 2)
+(def keyswitch-below-plate (- 9 plate-thickness))           ; approx space needed below keyswitch
 
 (def sa-profile-key-height 12.7)
 
-(def plate-thickness 2)
 (def side-nub-thickness 4)
 (def retention-tab-thickness 1.5)
 (def retention-tab-hole-thickness (- plate-thickness retention-tab-thickness))
@@ -112,6 +100,9 @@
       (->>
         top-nub-pair
         (rotate (/ pi 2) [0 0 1])))))
+
+(def switch-bottom
+  (translate [0 0 keyswitch-below-plate] (cube keyswitch-width keyswitch-width keyswitch-below-plate)))
 
 ;;;;;;;;;;;;;;;;
 ;; SA Keycaps ;;
@@ -165,20 +156,18 @@
 
 (def cap-top-height (+ plate-thickness sa-profile-key-height))
 (def row-radius (+ (/ (/ (+ mount-height extra-height) 2)
-                      (Math/sin (/ α 2)))
+                      (Math/sin (/ column-curvature 2)))
                    cap-top-height))
 (def column-radius (+ (/ (/ (+ mount-width extra-width) 2)
-                         (Math/sin (/ β 2)))
+                         (Math/sin (/ row-curvature 2)))
                       cap-top-height))
-(def column-x-delta (+ -1 (- (* column-radius (Math/sin β)))))
+(def column-x-delta (+ -1 (- (* column-radius (Math/sin row-curvature)))))
 
-(defn offset-for-column [col]
-  (if (and (true? pinky-15u) (= col lastcol)) 5.5 0))
 (defn apply-key-geometry [translate-fn rotate-x-fn rotate-y-fn column row shape]
-  (let [column-angle (* β (- centercol column))
+  (let [column-angle (* row-curvature (- centercol column))
         placed-shape (->> shape
-                          (translate-fn [(offset-for-column column) 0 (- row-radius)])
-                          (rotate-x-fn (* α (- centerrow row)))
+                          (translate-fn [0 0 (- row-radius)])
+                          (rotate-x-fn (* column-curvature (- centerrow row)))
                           (translate-fn [0 0 row-radius])
                           (translate-fn [0 0 (- column-radius)])
                           (rotate-y-fn column-angle)
@@ -187,22 +176,14 @@
         column-z-delta (* column-radius (- 1 (Math/cos column-angle)))
         placed-shape-ortho (->> shape
                                 (translate-fn [0 0 (- row-radius)])
-                                (rotate-x-fn (* α (- centerrow row)))
+                                (rotate-x-fn (* column-curvature (- centerrow row)))
                                 (translate-fn [0 0 row-radius])
                                 (rotate-y-fn column-angle)
                                 (translate-fn [(- (* (- column centercol) column-x-delta)) 0 column-z-delta])
-                                (translate-fn (column-offset column)))
-        placed-shape-fixed (->> shape
-                                (rotate-y-fn (nth fixed-angles column))
-                                (translate-fn [(nth fixed-x column) 0 (nth fixed-z column)])
-                                (translate-fn [0 0 (- (+ row-radius (nth fixed-z column)))])
-                                (rotate-x-fn (* α (- centerrow row)))
-                                (translate-fn [0 0 (+ row-radius (nth fixed-z column))])
-                                (rotate-y-fn fixed-tenting)
-                                (translate-fn [0 (second (column-offset column)) 0]))]
+                                (translate-fn (column-offset column)))]
+
     (->> (case column-style
            :orthographic placed-shape-ortho
-           :fixed placed-shape-fixed
            placed-shape)
          (rotate-y-fn tenting-angle)
          (translate-fn [0 0 keyboard-z-offset]))))
@@ -230,23 +211,19 @@
 (defn key-position [column row position]
   (apply-key-geometry (partial map +) rotate-around-x rotate-around-y column row position))
 
-(def key-holes
+(defn key-places [shape]
   (apply union
          (for [column columns
                row rows
                :when (or (.contains [2 3] column)
                          (not= row lastrow))]
-           (->> single-plate
+           (->> shape
                 (key-place column row)))))
+(def key-holes
+  (key-places single-plate))
 
 (def caps
-  (apply union
-         (for [column columns
-               row rows
-               :when (or (.contains [2 3] column)
-                         (not= row lastrow))]
-           (->> (sa-cap (if (and (true? pinky-15u) (= column lastcol)) 1.5 1))
-                (key-place column row)))))
+  (key-places (sa-cap 1)))
 
 ;;;;;;;;;;;;;;;;;;;;
 ;; Web Connectors ;;
@@ -278,17 +255,6 @@
 (def fat-post-adj (/ fat-post-size 2))
 (def fat-web-post-tr (translate [(- (/ mount-width 2) fat-post-adj) (- (/ mount-height 2) fat-post-adj) 0] fat-web-post))
 ; wide posts for 1.5u keys in the main cluster
-
-(if (true? pinky-15u)
-  (do (def wide-post-tr (translate [(- (/ mount-width 1.2) post-adj) (- (/ mount-height 2) post-adj) 0] web-post))
-      (def wide-post-tl (translate [(+ (/ mount-width -1.2) post-adj) (- (/ mount-height 2) post-adj) 0] web-post))
-      (def wide-post-bl (translate [(+ (/ mount-width -1.2) post-adj) (+ (/ mount-height -2) post-adj) 0] web-post))
-      (def wide-post-br (translate [(- (/ mount-width 1.2) post-adj) (+ (/ mount-height -2) post-adj) 0] web-post)))
-  (do (def wide-post-tr web-post-tr)
-      (def wide-post-tl web-post-tl)
-      (def wide-post-bl web-post-bl)
-      (def wide-post-br web-post-br)))
-
 
 (defn triangle-hulls [& shapes]
   (apply union
@@ -346,10 +312,12 @@
        (translate thumborigin)
        (translate move)))
 
+;original concave
 (defn thumb-r-place [shape] (thumb-place [14 -15 10] [-15 -10 5] shape)) ; right
 (defn thumb-m-place [shape] (thumb-place [10 -23 25] [-35 -16 -2] shape)) ; middle
 (defn thumb-l-place [shape] (thumb-place [6 -32 35] [-51 -25 -11.5] shape)) ; left
 
+; convex
 (defn thumb-r-place [shape] (thumb-place [14 -32 10] [-15 -10 5] shape)) ; right
 (defn thumb-m-place [shape] (thumb-place [10 -23 20] [-33 -15 -4.5] shape)) ; middle
 (defn thumb-l-place [shape] (thumb-place [6 -15 35] [-51.5 -24.5 -11.5] shape)) ; left
@@ -380,7 +348,7 @@
 (defn bottom-hull [& p]
   (hull p (bottom 0.001 p)))
 
-(defn wall-locate1 [dx dy] [(* dx wall-thickness) (* dy wall-thickness) -1])
+(defn wall-locate1 [dx dy] [(* dx wall-thickness) (* dy wall-thickness) 0])
 (defn wall-locate2 [dx dy] [(* dx wall-xy-offset) (* dy wall-xy-offset) wall-z-offset])
 (defn wall-locate3 [dx dy] [(* dx (+ wall-xy-offset wall-thickness)) (* dy (+ wall-xy-offset wall-thickness)) wall-z-offset])
 
@@ -433,7 +401,7 @@
       )
     (hull
       (thumb-r-place web-post-tr)                           ; top ridge finger side
-      (thumb-r-place web-post-tl)  ; need extra thickness otherwise wall gets thinner than a single extrusion
+      (thumb-r-place web-post-tl)                           ; need extra thickness otherwise wall gets thinner than a single extrusion
       (key-place 0 cornerrow web-post-bl)
       (key-place 0 cornerrow web-post-br))
     (piramid-hulls                                          ; infill between top ridge and fingers
@@ -472,16 +440,21 @@
       (place2 (translate (wall-locate3 dx2 dy2) post2)))))
 
 (defn key-wall-brace [x1 y1 dx1 dy1 post1 x2 y2 dx2 dy2 post2]
-  (wall-brace (partial key-place x1 y1) dx1 dy1 post1
-              (partial key-place x2 y2) dx2 dy2 post2))
+    (wall-brace (partial key-place x1 y1) dx1 dy1 post1
+                (partial key-place x2 y2) dx2 dy2 post2))
+
+(defn key-corner [x y loc]
+  (case loc
+    :tl (key-wall-brace x y 0 1 web-post-tl x y -1 0 web-post-tl)
+    :tr (key-wall-brace x y 0 1 web-post-tr x y 1 0 web-post-tr)
+    :bl (key-wall-brace x y 0 -1 web-post-bl x y -1 0 web-post-bl)
+    :br (key-wall-brace x y 0 -1 web-post-br x y 1 0 web-post-br)))
 
 (def right-wall
-  (let [tr (if (true? pinky-15u) wide-post-tr web-post-tr)
-        br (if (true? pinky-15u) wide-post-br web-post-br)]
-    (union (key-wall-brace lastcol 0 0 1 tr lastcol 0 1 0 tr)
-           (for [y (range 0 lastrow)] (key-wall-brace lastcol y 1 0 tr lastcol y 1 0 br))
-           (for [y (range 1 lastrow)] (key-wall-brace lastcol (dec y) 1 0 br lastcol y 1 0 tr))
-           (key-wall-brace lastcol cornerrow 0 -1 br lastcol cornerrow 1 0 br))))
+  (union (key-corner lastcol 0 :tr)
+         (for [y (range 0 lastrow)] (key-wall-brace lastcol y 1 0 web-post-tr lastcol y 1 0 web-post-br))
+         (for [y (range 1 lastrow)] (key-wall-brace lastcol (dec y) 1 0 web-post-br lastcol y 1 0 web-post-tr))
+         (key-corner lastcol cornerrow :br)))
 
 
 (def case-walls
@@ -584,8 +557,8 @@
          (screw-insert 0 lastrow bottom-radius top-radius height [0 0 0])
          ;  (screw-insert lastcol lastrow  bottom-radius top-radius height [-5 13 0])
          ;  (screw-insert lastcol 0         bottom-radius top-radius height [-3 6 0])
-         (screw-insert lastcol lastrow bottom-radius top-radius height (if pinky-15u [0 12 0] [-5 12 0])) ; -5 12
-         (screw-insert lastcol 0 bottom-radius top-radius height (if pinky-15u [0 7 0] [-4 8 0])) ; -5 7
+         (screw-insert lastcol lastrow bottom-radius top-radius height [-5 12 0]) ; -5 12
+         (screw-insert lastcol 0 bottom-radius top-radius height [-4 8 0]) ; -5 7
          (screw-insert 1 lastrow bottom-radius top-radius height [0 -16 0])))
 
 ; Hole Depth Y: 4.4
@@ -600,56 +573,27 @@
 (def screw-insert-outers (screw-insert-all-shapes (+ screw-insert-bottom-radius 1.65) (+ screw-insert-top-radius 1.65) (+ screw-insert-height 1.5)))
 (def screw-insert-screw-holes (screw-insert-all-shapes 1.7 1.7 350))
 
-(def pinky-connectors
-  (apply union
-         (concat
-           ;; Row connections
-           (for [row (range 0 lastrow)]
-             (triangle-hulls
-               (key-place lastcol row web-post-tr)
-               (key-place lastcol row wide-post-tr)
-               (key-place lastcol row web-post-br)
-               (key-place lastcol row wide-post-br)))
-
-           ;; Column connections
-           (for [row (range 0 cornerrow)]
-             (triangle-hulls
-               (key-place lastcol row web-post-br)
-               (key-place lastcol row wide-post-br)
-               (key-place lastcol (inc row) web-post-tr)
-               (key-place lastcol (inc row) wide-post-tr)))
-           ;;
-           )))
-
-(def pinky-walls
-  (union
-    (key-wall-brace lastcol cornerrow 0 -1 web-post-br lastcol cornerrow 0 -1 wide-post-br)
-    (key-wall-brace lastcol 0 0 1 web-post-tr lastcol 0 0 1 wide-post-tr)))
-
 (def model-right (difference
                    (union
                      key-holes
-                     pinky-connectors
-                     pinky-walls
                      connectors
                      thumb
-                     thumbcaps
                      thumb-connectors
                      (difference (union case-walls
-                                        ;screw-insert-outers
+                                        screw-insert-outers
                                         pro-micro-holder
-                                        ;usb-holder-holder
-                                        ;trrs-holder
+                                        usb-holder-holder
+                                        trrs-holder
                                         )
-                                 ;usb-holder-space
-                                 ;usb-jack
-                                 ;trrs-holder-hole
-                                 ;screw-insert-holes
+                                 usb-holder-space
+                                 usb-jack
+                                 trrs-holder-hole
+                                 screw-insert-holes
                                  ))
                    (translate [0 0 -20] (cube 350 350 40))))
 ;
-;(spit "things/right.scad"
-;      (write-scad model-right))
+(spit "things/right.scad"
+      (write-scad model-right))
 ;
 ;(spit "things/left.scad"
 ;      (write-scad (mirror [-1 0 0] model-right)))
@@ -663,6 +607,7 @@
             thumb
             thumb-connectors
             case-walls
+            ;(debug(bottom))
             )
           (translate [0 0 -20] (cube 350 350 40)))))
 ;
@@ -671,8 +616,6 @@
 ;       (difference
 ;        (union
 ;         key-holes
-;         pinky-connectors
-;         pinky-walls
 ;         connectors
 ;         thumb
 ;         thumb-connectors
@@ -681,15 +624,25 @@
 ;         caps)
 ;
 ;        (translate [0 0 -20] (cube 350 350 40)))))
+
+;(def bottom
+;  (cut (translate
+;         [0 0 (- bottom-thickness)]
+;         (union case-walls))))
 ;
+;(def bottom-base
+;  (hull bottom))
+;(def bottom-outline
+;  (project bottom-base))
+;
+;(def bottom-wall
+;  (offset (- (* 2 wall-thickness)) (hull bottom)))
+
 ;(spit "things/right-plate.scad"
 ;      (write-scad
-;       (cut
-;        (translate [0 0 -0.1]
-;                   (difference (union case-walls
-;                                      pinky-walls
-;                                      screw-insert-outers)
-;                               (translate [0 0 -10] screw-insert-screw-holes))))))
+;        bottom-base
+;        (extrude-linear {:convexity 10 :height 3} bottom))
+;      )
 ;
 ;(spit "things/test.scad"
 ;      (write-scad
