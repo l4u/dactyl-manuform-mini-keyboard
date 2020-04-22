@@ -338,6 +338,11 @@
 (defn thumb-m-place [shape] (thumb-place [10 -23 20] [-33 -15 -4.5] shape)) ; middle
 (defn thumb-l-place [shape] (thumb-place [6 -15 35] [-51.5 -24.5 -11.5] shape)) ; left
 
+; convexer
+(defn thumb-r-place [shape] (thumb-place [14 -40 10] [-15 -10 5] shape)) ; right
+(defn thumb-m-place [shape] (thumb-place [10 -23 20] [-33 -15 -6] shape)) ; middle
+(defn thumb-l-place [shape] (thumb-place [6 -10 35] [-51.5 -24.5 -12.2] shape)) ; left
+
 (defn thumb-layout [shape]
   (union
     (thumb-r-place shape)
@@ -594,6 +599,18 @@
             (debug key-space-below)
             (debug thumb-space-below)
             (debug usb-holder-space)
+            )
+          (translate [0 0 -20] (cube 350 350 40)))))
+
+
+
+(spit "things/thumb.scad"
+      (write-scad
+        (difference
+          (union
+            thumb
+            thumb-connectors
+            thumbcaps
             )
           (translate [0 0 -20] (cube 350 350 40)))))
 ;
