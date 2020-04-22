@@ -27,7 +27,7 @@
                                (>= column 4) [0 -10 6]
                                :else [0 0 0]))
 
-(def thumb-offsets [6 -3 7])
+(def thumb-offsets [6 -3 4])
 
 (def keyboard-z-offset 4)                                   ; controls overall height; original=9 with centercol=3; use 16 for centercol=2
 
@@ -55,8 +55,8 @@
 ;; Switch Hole ;;
 ;;;;;;;;;;;;;;;;;
 
-(def keyswitch-height 14.1)                                 ;; Was 14.1, then 14.25
-(def keyswitch-width 14.1)
+(def keyswitch-height 14)                                 ;; Was 14.1, then 14.25
+(def keyswitch-width 14)
 (def plate-thickness 2)
 (def keyswitch-below-plate (- 9 plate-thickness))           ; approx space needed below keyswitch
 
@@ -93,21 +93,20 @@
         plate-half (union top-wall left-wall (if create-side-nubs? (with-fn 100 side-nub)))
         top-nub (->> (cube 5 5 retention-tab-hole-thickness)
                      (translate [(+ (/ keyswitch-width 2)) 0 (/ retention-tab-hole-thickness 2)]))
-        top-nub-pair (union top-nub
-                            (->> top-nub
-                                 (mirror [1 0 0])
-                                 (mirror [0 1 0])))]
+        top-nub-quad (union top-nub
+                            (rotate (deg2rad 90) [0 0 1] top-nub)
+                            (rotate (deg2rad 180) [0 0 1] top-nub)
+                            (rotate (deg2rad 270) [0 0 1] top-nub))]
     (difference
       (union plate-half
              (->> plate-half
                   (mirror [1 0 0])
                   (mirror [0 1 0])))
-      (->>
-        top-nub-pair
-        (rotate (/ pi 2) [0 0 1])))))
+      top-nub-quad)))
 
+;amoeba is 16 mm high
 (def switch-bottom
-  (translate [0 0 (/ keyswitch-below-plate -2)] (cube keyswitch-width keyswitch-width keyswitch-below-plate)))
+  (translate [0 0 (/ keyswitch-below-plate -2)] (cube 16 keyswitch-width keyswitch-below-plate)))
 
 ;;;;;;;;;;;;;;;;
 ;; SA Keycaps ;;
@@ -211,6 +210,14 @@
     [[(Math/cos angle) 0 (Math/sin angle)]
      [0 1 0]
      [(- (Math/sin angle)) 0 (Math/cos angle)]]
+    position))
+
+
+(defn rotate-around-z [angle position]
+  (mmul
+    [[(Math/cos angle) (- (Math/sin angle)) 0]
+     [(Math/sin angle) (Math/cos angle) 0]
+     [0 0 1]]
     position))
 
 (defn key-position [column row position]
@@ -342,12 +349,9 @@
   (color [0.5 0.5 0.5 0.5] shape))
 
 (def thumbcaps (thumb-layout (sa-cap 1)))
-
 (def thumb (thumb-layout single-plate))
 (def thumb-fill (thumb-layout filled-plate))
-
-(def thumb-space-below
-  (thumb-layout switch-bottom))
+(def thumb-space-below (thumb-layout switch-bottom))
 ;;;;;;;;;;
 ;; Case ;;
 ;;;;;;;;;;
@@ -525,10 +529,10 @@
 
 (defn screw-insert-all-shapes [bottom-radius top-radius height]
   (union (screw-insert 2 0         bottom-radius top-radius height [-4 6.5 0]) ; top middle
-         (screw-insert 0 1         bottom-radius top-radius height [-6 6.5 0]) ; top middle
+         (screw-insert 0 1         bottom-radius top-radius height [-3.5 6.5 0]) ; left
          (screw-insert 0 lastrow   bottom-radius top-radius height [-25 -24  0]) ;thumb
-         (screw-insert (- lastcol 1) lastrow  bottom-radius top-radius height [9 12.9 0]) ; bottom right
-         (screw-insert (- lastcol 1) 0         bottom-radius top-radius height [9 7.5 0]) ; top right
+         (screw-insert (- lastcol 1) lastrow  bottom-radius top-radius height [9 13.9 0]) ; bottom right
+         (screw-insert (- lastcol 1) 0         bottom-radius top-radius height [9 6 0]) ; top right
          (screw-insert 2 (+ lastrow 1)     bottom-radius top-radius height [0 6 0]))) ;bottom middle
 
 ; Hole Depth Y: 4.4
@@ -581,9 +585,15 @@
             connectors
             thumb
             thumb-connectors
-            case-walls
+            (difference (union case-walls
+                               screw-insert-outers
+                               )
+                        usb-holder-space
+                        screw-insert-holes
+                        )
             (debug key-space-below)
             (debug thumb-space-below)
+            (debug usb-holder-space)
             )
           (translate [0 0 -20] (cube 350 350 40)))))
 ;
@@ -605,7 +615,8 @@
   (cut
     (translate [0 0 -0.1]
                (union case-walls
-                      screw-insert-outers)
+                      ;screw-insert-outers
+                      )
                ))
   )
 (def bottom-height 4)
@@ -619,17 +630,17 @@
 (def bottom-screw-holes
   (translate [0 0 (- bottom-height)]
              (union
-               (screw-insert-all-shapes 2.5 2.5 (- bottom-height 2))
+               (screw-insert-all-shapes 2.25 2.25 (- bottom-height 2))
                (screw-insert-all-shapes 1 1 50)
                )))
 (spit "things/right-plate.scad"
       (write-scad
         (difference
           (union
-            bottom-wall
             bottom-plate
             )
           (union
+            bottom-wall
             bottom-screw-holes
             thumb-space-below))))
 
