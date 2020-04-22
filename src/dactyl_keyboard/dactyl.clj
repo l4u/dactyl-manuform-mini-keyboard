@@ -29,7 +29,7 @@
 
 (def thumb-offsets [6 -3 7])
 
-(def keyboard-z-offset 9)                                   ; controls overall height; original=9 with centercol=3; use 16 for centercol=2
+(def keyboard-z-offset 4)                                   ; controls overall height; original=9 with centercol=3; use 16 for centercol=2
 
 (def extra-width 2.5)                                       ; extra space between the base of keys; original= 2
 (def extra-height 0.5)                                      ; original= 0.5
@@ -68,6 +68,11 @@
 (def mount-width (+ keyswitch-width 3))
 (def mount-height (+ keyswitch-height 3))
 
+;for the bottom
+(def filled-plate
+  (->> (cube mount-height mount-width plate-thickness)
+       (translate [0 0 (/ plate-thickness 2)])
+  ))
 (def single-plate
   (let [top-wall (->> (cube (+ keyswitch-width 3) 1.5 plate-thickness)
                       (translate [0
@@ -102,7 +107,7 @@
         (rotate (/ pi 2) [0 0 1])))))
 
 (def switch-bottom
-  (translate [0 0 keyswitch-below-plate] (cube keyswitch-width keyswitch-width keyswitch-below-plate)))
+  (translate [0 0 (/ keyswitch-below-plate -2)] (cube keyswitch-width keyswitch-width keyswitch-below-plate)))
 
 ;;;;;;;;;;;;;;;;
 ;; SA Keycaps ;;
@@ -221,7 +226,10 @@
                 (key-place column row)))))
 (def key-holes
   (key-places single-plate))
-
+(def key-fills
+  (key-places filled-plate))
+(def key-space-below
+  (key-places switch-bottom))
 (def caps
   (key-places (sa-cap 1)))
 
@@ -254,6 +262,7 @@
 
 (def fat-post-adj (/ fat-post-size 2))
 (def fat-web-post-tr (translate [(- (/ mount-width 2) fat-post-adj) (- (/ mount-height 2) fat-post-adj) 0] fat-web-post))
+(def fat-web-post-br (translate [(- (/ mount-width 2) fat-post-adj) (- (/ mount-height -2) fat-post-adj) 0] fat-web-post))
 ; wide posts for 1.5u keys in the main cluster
 
 (defn triangle-hulls [& shapes]
@@ -335,7 +344,10 @@
 (def thumbcaps (thumb-layout (sa-cap 1)))
 
 (def thumb (thumb-layout single-plate))
+(def thumb-fill (thumb-layout filled-plate))
 
+(def thumb-space-below
+  (thumb-layout switch-bottom))
 ;;;;;;;;;;
 ;; Case ;;
 ;;;;;;;;;;
@@ -409,7 +421,7 @@
       (key-place 0 cornerrow web-post-br)
       (key-place 1 cornerrow web-post-bl)
       (key-place 1 cornerrow web-post-br)
-      (thumb-r-place web-post-br))
+      (thumb-r-place fat-web-post-br))
     (triangle-hulls
       (key-place 2 lastrow web-post-tl)
       (key-place 1 cornerrow web-post-br)
@@ -491,106 +503,69 @@
     (wall-brace thumb-l-place -1 0 web-post-bl thumb-l-place -1 0 web-post-tl)
     ))
 
-(def usb-holder-ref (key-position 0 0 (map - (wall-locate2 0 -1) [0 (/ mount-height 2) 0])))
+; Offsets for the controller/trrs holder cutout
+(def holder-offset -3.5)
 
-(def usb-holder-position (map + [17 19.3 0] [(first usb-holder-ref) (second usb-holder-ref) 2]))
-(def usb-holder-cube (cube 15 12 2))
-(def usb-holder-space (translate (map + usb-holder-position [0 (* -1 wall-thickness) 1]) usb-holder-cube))
-(def usb-holder-holder (translate usb-holder-position (cube 19 12 4)))
+; Cutout for controller/trrs jack holder
+(def usb-holder-ref (key-position 0 0 (map - (wall-locate2  0  -1) [0 (/ mount-height 2) 0])))
+(def usb-holder-position (map + [(+ 18.8 holder-offset) 18.7 1.3] [(first usb-holder-ref) (second usb-holder-ref) 2]))
+(def usb-holder-cube   (cube 28.666 30 12.6))
+(def usb-holder-space  (translate (map + usb-holder-position [-1.5 (* -1 wall-thickness) 3]) usb-holder-cube))
 
-(def usb-jack (translate (map + usb-holder-position [0 10 3]) (cube 8.1 20 3.1)))
-
-(def pro-micro-position (map + (key-position 0 1 (wall-locate3 -1 0)) [-3 2 -15]))
-(def pro-micro-space-size [4 10 12])                        ; z has no wall;
-(def pro-micro-wall-thickness 2)
-(def pro-micro-holder-size [(+ pro-micro-wall-thickness (first pro-micro-space-size)) (+ pro-micro-wall-thickness (second pro-micro-space-size)) (last pro-micro-space-size)])
-(def pro-micro-space
-  (->> (cube (first pro-micro-space-size) (second pro-micro-space-size) (last pro-micro-space-size))
-       (translate [(- (first pro-micro-position) (/ pro-micro-wall-thickness 2)) (- (second pro-micro-position) (/ pro-micro-wall-thickness 2)) (last pro-micro-position)])))
-(def pro-micro-holder
-  (difference
-    (->> (cube (first pro-micro-holder-size) (second pro-micro-holder-size) (last pro-micro-holder-size))
-         (translate [(first pro-micro-position) (second pro-micro-position) (last pro-micro-position)]))
-    pro-micro-space))
-
-(def trrs-holder-size [6.2 10 2])                           ; trrs jack PJ-320A
-(def trrs-holder-hole-size [6.2 10 6])                      ; trrs jack PJ-320A
-(def trrs-holder-position (map + usb-holder-position [-13.6 0 0]))
-(def trrs-holder-thickness 2)
-(def trrs-holder-thickness-2x (* 2 trrs-holder-thickness))
-(def trrs-holder
-  (union
-    (->> (cube (+ (first trrs-holder-size) trrs-holder-thickness-2x) (+ trrs-holder-thickness (second trrs-holder-size)) (+ (last trrs-holder-size) trrs-holder-thickness))
-         (translate [(first trrs-holder-position) (second trrs-holder-position) (/ (+ (last trrs-holder-size) trrs-holder-thickness) 2)]))))
-(def trrs-holder-hole
-  (union
-
-    ; circle trrs hole
-    (->>
-      (->> (binding [*fn* 30] (cylinder 2.55 20)))          ; 5mm trrs jack
-      (rotate (deg2rad 90) [1 0 0])
-      (translate [(first trrs-holder-position) (+ (second trrs-holder-position) (/ (+ (second trrs-holder-size) trrs-holder-thickness) 2)) (+ 3 (/ (+ (last trrs-holder-size) trrs-holder-thickness) 2))])) ;1.5 padding
-
-    ; rectangular trrs holder
-    (->> (apply cube trrs-holder-hole-size) (translate [(first trrs-holder-position) (+ (/ trrs-holder-thickness -2) (second trrs-holder-position)) (+ (/ (last trrs-holder-hole-size) 2) trrs-holder-thickness)]))))
-
+; Screw insert definition & position
 (defn screw-insert-shape [bottom-radius top-radius height]
-  (union
     (->> (binding [*fn* 30]
            (cylinder [bottom-radius top-radius] height)))
-    (translate [0 0 (/ height 2)] (->> (binding [*fn* 30] (sphere top-radius))))))
+    )
 
 (defn screw-insert [column row bottom-radius top-radius height offset]
-  (let [shift-right (= column lastcol)
-        shift-left (= column 0)
-        shift-up (and (not (or shift-right shift-left)) (= row 0))
-        shift-down (and (not (or shift-right shift-left)) (>= row lastrow))
-        position (if shift-up (key-position column row (map + (wall-locate2 0 1) [0 (/ mount-height 2) 0]))
-                              (if shift-down (key-position column row (map - (wall-locate2 0 -1) [0 (/ mount-height 2) 0]))
-                                             (if shift-left (key-position column row (map - (wall-locate2 -1 0) [(/ mount-width 2) 0 0]))
-                                                            (key-position column row (map + (wall-locate2 1 0) [(/ mount-width 2) 0 0])))))]
+  (let [position (key-position column row [0 0 0])]
     (->> (screw-insert-shape bottom-radius top-radius height)
          (translate (map + offset [(first position) (second position) (/ height 2)])))))
 
 (defn screw-insert-all-shapes [bottom-radius top-radius height]
-  (union (screw-insert 0 0 bottom-radius top-radius height [11 10 0])
-         (screw-insert 0 lastrow bottom-radius top-radius height [0 0 0])
-         ;  (screw-insert lastcol lastrow  bottom-radius top-radius height [-5 13 0])
-         ;  (screw-insert lastcol 0         bottom-radius top-radius height [-3 6 0])
-         (screw-insert lastcol lastrow bottom-radius top-radius height [-5 12 0]) ; -5 12
-         (screw-insert lastcol 0 bottom-radius top-radius height [-4 8 0]) ; -5 7
-         (screw-insert 1 lastrow bottom-radius top-radius height [0 -16 0])))
+  (union (screw-insert 2 0         bottom-radius top-radius height [-4 6.5 0]) ; top middle
+         (screw-insert 0 1         bottom-radius top-radius height [-6 6.5 0]) ; top middle
+         (screw-insert 0 lastrow   bottom-radius top-radius height [-25 -24  0]) ;thumb
+         (screw-insert (- lastcol 1) lastrow  bottom-radius top-radius height [9 12.9 0]) ; bottom right
+         (screw-insert (- lastcol 1) 0         bottom-radius top-radius height [9 7.5 0]) ; top right
+         (screw-insert 2 (+ lastrow 1)     bottom-radius top-radius height [0 6 0]))) ;bottom middle
 
 ; Hole Depth Y: 4.4
 (def screw-insert-height 4)
 
 ; Hole Diameter C: 4.1-4.4
-(def screw-insert-bottom-radius (/ 4.4 2))
-(def screw-insert-top-radius (/ 4.4 2))
-(def screw-insert-holes (screw-insert-all-shapes screw-insert-bottom-radius screw-insert-top-radius screw-insert-height))
+(def screw-insert-bottom-radius (/ 4.0 2))
+(def screw-insert-top-radius (/ 3.9 2))
+(def screw-insert-holes  (screw-insert-all-shapes screw-insert-bottom-radius screw-insert-top-radius screw-insert-height))
 
 ; Wall Thickness W:\t1.65
 (def screw-insert-outers (screw-insert-all-shapes (+ screw-insert-bottom-radius 1.65) (+ screw-insert-top-radius 1.65) (+ screw-insert-height 1.5)))
-(def screw-insert-screw-holes (screw-insert-all-shapes 1.7 1.7 350))
+(def screw-insert-screw-holes  (screw-insert-all-shapes 1.7 1.7 350))
 
-(def model-right (difference
-                   (union
-                     key-holes
-                     connectors
-                     thumb
-                     thumb-connectors
-                     (difference (union case-walls
-                                        screw-insert-outers
-                                        pro-micro-holder
-                                        usb-holder-holder
-                                        trrs-holder
-                                        )
-                                 usb-holder-space
-                                 usb-jack
-                                 trrs-holder-hole
-                                 screw-insert-holes
-                                 ))
-                   (translate [0 0 -20] (cube 350 350 40))))
+(def model-outline
+  (project
+    (union
+      key-fills
+      connectors
+      thumb-fill
+      thumb-connectors
+      case-walls)))
+
+(def model-right
+  (difference
+    (union
+      key-holes
+      connectors
+      thumb
+      thumb-connectors
+      (difference (union case-walls
+                         screw-insert-outers
+                         )
+                  usb-holder-space
+                  screw-insert-holes
+                  ))
+    (translate [0 0 -20] (cube 350 350 40))))
 ;
 (spit "things/right.scad"
       (write-scad model-right))
@@ -607,7 +582,8 @@
             thumb
             thumb-connectors
             case-walls
-            ;(debug(bottom))
+            (debug key-space-below)
+            (debug thumb-space-below)
             )
           (translate [0 0 -20] (cube 350 350 40)))))
 ;
@@ -625,27 +601,35 @@
 ;
 ;        (translate [0 0 -20] (cube 350 350 40)))))
 
-;(def bottom
-;  (cut (translate
-;         [0 0 (- bottom-thickness)]
-;         (union case-walls))))
-;
-;(def bottom-base
-;  (hull bottom))
-;(def bottom-outline
-;  (project bottom-base))
-;
-;(def bottom-wall
-;  (offset (- (* 2 wall-thickness)) (hull bottom)))
+(def wall-shape
+  (cut
+    (translate [0 0 -0.1]
+               (union case-walls
+                      screw-insert-outers)
+               ))
+  )
+(def bottom-height 4)
+(def bottom-height-half (/ bottom-height -2))
+(def bottom-plate
+  (difference
+    (translate [0 0 (- (- bottom-height 1))] (extrude-linear {:height 2 :twist 0 :convexity 0} model-outline))
+    key-space-below))
+(def bottom-wall
+  (translate [0 0 bottom-height-half] (extrude-linear {:height bottom-height :twist 0 :convexity 0} wall-shape)))
+(def bottom-screw-holes
+  (translate [0 0 (- bottom-height)]
+             (union
+               (screw-insert-all-shapes 2.5 2.5 (- bottom-height 2))
+               (screw-insert-all-shapes 1 1 50)
+               )))
+(spit "things/right-plate.scad"
+      (write-scad
+        (difference
+          (union
+            bottom-wall
+            bottom-plate
+            )
+          (union
+            bottom-screw-holes
+            thumb-space-below))))
 
-;(spit "things/right-plate.scad"
-;      (write-scad
-;        bottom-base
-;        (extrude-linear {:convexity 10 :height 3} bottom))
-;      )
-;
-;(spit "things/test.scad"
-;      (write-scad
-;       (difference trrs-holder trrs-holder-hole)))
-;
-;(defn -main [dum] 1)  ; dummy to make it easier to batch
