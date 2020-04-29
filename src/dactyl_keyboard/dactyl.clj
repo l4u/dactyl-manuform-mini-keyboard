@@ -27,10 +27,10 @@
                                (>= column 4) [0 -10 6]
                                :else [0 0 0]))
 
-(def thumb-offsets [6 -3 4])
+(def thumb-offsets [6 -3 1])
 
-(def keyboard-z-offset 4)                                   ; controls overall height; original=9 with centercol=3; use 16 for centercol=2
-
+(def keyboard-z-offset 7)                                   ; controls overall height; original=9 with centercol=3; use 16 for centercol=2
+(def bottom-height 2)                                    ; plexiglass plate or printed plate
 (def extra-width 2.5)                                       ; extra space between the base of keys; original= 2
 (def extra-height 0.5)                                      ; original= 0.5
 
@@ -55,10 +55,10 @@
 ;; Switch Hole ;;
 ;;;;;;;;;;;;;;;;;
 
-(def keyswitch-height 14)                                 ;; Was 14.1, then 14.25
+(def keyswitch-height 14)                                   ;; Was 14.1, then 14.25
 (def keyswitch-width 14)
 (def plate-thickness 2)
-(def keyswitch-below-plate (- 9 plate-thickness))           ; approx space needed below keyswitch
+(def keyswitch-below-plate (- 8 plate-thickness))           ; approx space needed below keyswitch
 
 (def sa-profile-key-height 12.7)
 
@@ -72,7 +72,7 @@
 (def filled-plate
   (->> (cube mount-height mount-width plate-thickness)
        (translate [0 0 (/ plate-thickness 2)])
-  ))
+       ))
 (def single-plate
   (let [top-wall (->> (cube (+ keyswitch-width 3) 1.5 plate-thickness)
                       (translate [0
@@ -269,7 +269,9 @@
 
 (def fat-post-adj (/ fat-post-size 2))
 (def fat-web-post-tr (translate [(- (/ mount-width 2) fat-post-adj) (- (/ mount-height 2) fat-post-adj) 0] fat-web-post))
-(def fat-web-post-br (translate [(- (/ mount-width 2) fat-post-adj) (- (/ mount-height -2) fat-post-adj) 0] fat-web-post))
+(def fat-web-post-tl (translate [(+ (/ mount-width -2) fat-post-adj) (- (/ mount-height 2) fat-post-adj) 0] fat-web-post))
+(def fat-web-post-bl (translate [(+ (/ mount-width -2) fat-post-adj) (+ (/ mount-height -2) fat-post-adj) 0] fat-web-post))
+(def fat-web-post-br (translate [(- (/ mount-width 2) fat-post-adj) (+ (/ mount-height -2) fat-post-adj) 0] fat-web-post))
 ; wide posts for 1.5u keys in the main cluster
 
 (defn triangle-hulls [& shapes]
@@ -412,7 +414,7 @@
       (thumb-m-place web-post-tr)
       (thumb-m-place web-post-tl))
     (piramid-hulls                                          ; top ridge thumb side
-      (key-place 0 cornerrow (translate (wall-locate1 -1 0) web-post-bl))
+      (key-place 0 cornerrow (translate (wall-locate1 -1 0) fat-web-post-bl))
       (key-place 0 cornerrow (translate (wall-locate2 -1 0) web-post-bl))
       (key-place 0 cornerrow web-post-bl)
       (thumb-r-place web-post-tr)
@@ -461,8 +463,8 @@
       (place2 (translate (wall-locate3 dx2 dy2) post2)))))
 
 (defn key-wall-brace [x1 y1 dx1 dy1 post1 x2 y2 dx2 dy2 post2]
-    (wall-brace (partial key-place x1 y1) dx1 dy1 post1
-                (partial key-place x2 y2) dx2 dy2 post2))
+  (wall-brace (partial key-place x1 y1) dx1 dy1 post1
+              (partial key-place x2 y2) dx2 dy2 post2))
 
 (defn key-corner [x y loc]
   (case loc
@@ -514,18 +516,23 @@
 
 ; Offsets for the controller/trrs holder cutout
 (def holder-offset -3.5)
+(def notch-offset 3.15)
 
 ; Cutout for controller/trrs jack holder
-(def usb-holder-ref (key-position 0 0 (map - (wall-locate2  0  -1) [0 (/ mount-height 2) 0])))
-(def usb-holder-position (map + [(+ 18.8 holder-offset) 18.7 1.3] [(first usb-holder-ref) (second usb-holder-ref) 2]))
-(def usb-holder-cube   (cube 28.666 30 12.6))
-(def usb-holder-space  (translate (map + usb-holder-position [-1.5 (* -1 wall-thickness) 3]) usb-holder-cube))
+(def usb-holder-keypos (key-position 0 0 (map - (wall-locate3 0 -1) [0 (/ mount-height 2) 0])))
+(def usb-holder-offset [18.8 18.7 (- bottom-height 1)])
+(def usb-holder-z )
+(def usb-holder-size [30 40 15]) ; todo fix
+(def notch-size [33 1.5 ])
+(def usb-holder-cube translate map  (apply cube usb-holder-size))
+(def usb-holder-space (translate (map + usb-holder-position [-1.5 (- wall-thickness) 6.6]) usb-holder-cube))
+(def usb-holder-notch (translate (map + usb-holder-position [-1.5 (+ 4.4 notch-offset) 6.6]) (cube 31.366 1.3 (+ 19.8 bottom-height))))
 
 ; Screw insert definition & position
 (defn screw-insert-shape [bottom-radius top-radius height]
-    (->> (binding [*fn* 30]
-           (cylinder [bottom-radius top-radius] height)))
-    )
+  (->> (binding [*fn* 30]
+         (cylinder [bottom-radius top-radius] height)))
+  )
 
 (defn screw-insert [column row bottom-radius top-radius height offset]
   (let [position (key-position column row [0 0 0])]
@@ -533,12 +540,12 @@
          (translate (map + offset [(first position) (second position) (/ height 2)])))))
 
 (defn screw-insert-all-shapes [bottom-radius top-radius height]
-  (union (screw-insert 2 0         bottom-radius top-radius height [-4 6.5 0]) ; top middle
-         (screw-insert 0 1         bottom-radius top-radius height [-3.5 6.5 0]) ; left
-         (screw-insert 0 lastrow   bottom-radius top-radius height [-25 -24  0]) ;thumb
-         (screw-insert (- lastcol 1) lastrow  bottom-radius top-radius height [9 13.9 0]) ; bottom right
-         (screw-insert (- lastcol 1) 0         bottom-radius top-radius height [9 6 0]) ; top right
-         (screw-insert 2 (+ lastrow 1)     bottom-radius top-radius height [0 6 0]))) ;bottom middle
+  (union (screw-insert 2 0 bottom-radius top-radius height [-4 5.5 bottom-height]) ; top middle
+         (screw-insert 0 1 bottom-radius top-radius height [-4 6.5 bottom-height]) ; left
+         (screw-insert 0 lastrow bottom-radius top-radius height [-14 -3 bottom-height]) ;thumb
+         (screw-insert (- lastcol 1) lastrow bottom-radius top-radius height [9 13.9 bottom-height]) ; bottom right
+         (screw-insert (- lastcol 1) 0 bottom-radius top-radius height [9 6 bottom-height]) ; top right
+         (screw-insert 2 (+ lastrow 1) bottom-radius top-radius height [0 7 bottom-height]))) ;bottom middle
 
 ; Hole Depth Y: 4.4
 (def screw-insert-height 4)
@@ -546,11 +553,18 @@
 ; Hole Diameter C: 4.1-4.4
 (def screw-insert-bottom-radius (/ 4.0 2))
 (def screw-insert-top-radius (/ 3.9 2))
-(def screw-insert-holes  (screw-insert-all-shapes screw-insert-bottom-radius screw-insert-top-radius screw-insert-height))
+(def screw-insert-holes (screw-insert-all-shapes screw-insert-bottom-radius screw-insert-top-radius screw-insert-height))
 
 ; Wall Thickness W:\t1.65
 (def screw-insert-outers (screw-insert-all-shapes (+ screw-insert-bottom-radius 1.65) (+ screw-insert-top-radius 1.65) (+ screw-insert-height 1.5)))
-(def screw-insert-screw-holes  (screw-insert-all-shapes 1.7 1.7 350))
+(def screw-insert-screw-holes (screw-insert-all-shapes 1.7 1.7 350))
+
+(def holder (rotate (deg2rad 0) [0 0 1]
+                    (rotate (deg2rad 90) [1 0 0]
+                    (import "../things/controller holder.stl"))))
+
+(spit "things/test2.scad" (write-scad holder))
+
 
 (def model-outline
   (project
@@ -572,6 +586,7 @@
                          screw-insert-outers
                          )
                   usb-holder-space
+                  usb-holder-notch
                   screw-insert-holes
                   ))
     (translate [0 0 -20] (cube 350 350 40))))
@@ -581,7 +596,6 @@
 ;
 ;(spit "things/left.scad"
 ;      (write-scad (mirror [-1 0 0] model-right)))
-
 (spit "things/test.scad"
       (write-scad
         (difference
@@ -601,8 +615,6 @@
             (debug usb-holder-space)
             )
           (translate [0 0 -20] (cube 350 350 40)))))
-
-
 
 (spit "things/thumb.scad"
       (write-scad
@@ -632,32 +644,61 @@
   (cut
     (translate [0 0 -0.1]
                (union case-walls
-                      ;screw-insert-outers
+                      screw-insert-outers
                       )
                ))
   )
-(def bottom-height 4)
-(def bottom-height-half (/ bottom-height -2))
+
+
+(def wall-shape (cut (translate [0 0 -0.1] (difference case-walls usb-holder-space))))
+
+(def bottom-height-half (/ bottom-height 2))
 (def bottom-plate
-  (difference
-    (translate [0 0 (- (- bottom-height 1))] (extrude-linear {:height 2 :twist 0 :convexity 0} model-outline))
-    key-space-below))
+    (translate [0 0 bottom-height-half] (extrude-linear {:height 2 :twist 0 :convexity 0}
+                                                        (difference model-outline
+                                                                    (offset 0.1 wall-shape)
+                                                                    ))
+    ))
 (def bottom-wall
   (translate [0 0 bottom-height-half] (extrude-linear {:height bottom-height :twist 0 :convexity 0} wall-shape)))
-(def bottom-screw-holes
-  (translate [0 0 (- bottom-height)]
-             (union
-               (screw-insert-all-shapes 2.25 2.25 (- bottom-height 2))
-               (screw-insert-all-shapes 1 1 50)
-               )))
-(spit "things/right-plate.scad"
+
+(def bottom-wall-usb-holder
+  (translate [0 0 bottom-height]
+             (extrude-linear {:height bottom-height-half :twist 0 :convexity 0}
+                             (offset 3 ))))
+
+(def screw-head-height 1)
+(def layer-height 0.2)
+(def bottom-screw-holes-head
+  (translate [0 0 (- bottom-height)] (screw-insert-all-shapes 2.25 2.25 screw-head-height)))
+;keep a layer thickness so we can bridge over without supports
+(def bottom-screw-holes-top
+  (translate [0 0 (- layer-height screw-head-height)]
+             (screw-insert-all-shapes 1 1 (- bottom-height screw-head-height))))
+
+(spit "things/test2.scad" (write-scad (union bottom-screw-holes-head bottom-screw-holes-top) ))
+(spit "things/right-plate-print.scad"
       (write-scad
         (difference
+          bottom-plate
           (union
-            bottom-plate
-            )
-          (union
-            bottom-wall
-            bottom-screw-holes
-            thumb-space-below))))
+            bottom-wall-usb-holder
+            key-space-below
+            thumb-space-below
+            bottom-screw-holes-head
+            bottom-screw-holes-top
+            ))))
+
+(spit "things/right-plate-cut.scad"
+      (write-scad
+        (cut
+          (translate [0 0 (- bottom-height)]                ;biggest cutout on top
+                     (difference
+                       (union
+                         bottom-plate
+                         )
+                       (union
+                         bottom-wall-usb-holder
+                         thumb-space-below
+                         (screw-insert-all-shapes 1 1 50)))))))
 
