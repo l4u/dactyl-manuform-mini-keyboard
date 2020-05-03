@@ -16,7 +16,7 @@
 
 (def column-curvature (deg2rad 17))                         ; 15                        ; curvature of the columns
 (def row-curvature (deg2rad 6))                             ; 5                   ; curvature of the rows
-(def centerrow (- nrows 2.75))                              ; controls front-back tilt
+(def centerrow 1.25)                              ; controls front-back tilt
 (def centercol 3)                                           ; controls left-right tilt / tenting (higher number is more tenting)
 (def tenting-angle (deg2rad 15))                            ; or, change this for more precise tenting control
 (def column-style
@@ -514,19 +514,6 @@
     (wall-brace thumb-l-place -1 0 web-post-bl thumb-l-place -1 0 web-post-tl)
     ))
 
-; Offsets for the controller/trrs holder cutout
-(def holder-offset -3.5)
-(def notch-offset 3.15)
-
-; Cutout for controller/trrs jack holder
-(def usb-holder-keypos (key-position 0 0 (map - (wall-locate3 0 -1) [0 (/ mount-height 2) 0])))
-(def usb-holder-offset [18.8 18.7 (- bottom-height 1)])
-(def usb-holder-z )
-(def usb-holder-size [30 40 15]) ; todo fix
-(def notch-size [33 1.5 ])
-(def usb-holder-cube translate map  (apply cube usb-holder-size))
-(def usb-holder-space (translate (map + usb-holder-position [-1.5 (- wall-thickness) 6.6]) usb-holder-cube))
-(def usb-holder-notch (translate (map + usb-holder-position [-1.5 (+ 4.4 notch-offset) 6.6]) (cube 31.366 1.3 (+ 19.8 bottom-height))))
 
 ; Screw insert definition & position
 (defn screw-insert-shape [bottom-radius top-radius height]
@@ -541,7 +528,7 @@
 
 (defn screw-insert-all-shapes [bottom-radius top-radius height]
   (union (screw-insert 2 0 bottom-radius top-radius height [-4 5.5 bottom-height]) ; top middle
-         (screw-insert 0 1 bottom-radius top-radius height [-4 6.5 bottom-height]) ; left
+         (screw-insert 0 1 bottom-radius top-radius height [-4.5 -8 bottom-height]) ; left
          (screw-insert 0 lastrow bottom-radius top-radius height [-14 -3 bottom-height]) ;thumb
          (screw-insert (- lastcol 1) lastrow bottom-radius top-radius height [9 13.9 bottom-height]) ; bottom right
          (screw-insert (- lastcol 1) 0 bottom-radius top-radius height [9 6 bottom-height]) ; top right
@@ -559,11 +546,19 @@
 (def screw-insert-outers (screw-insert-all-shapes (+ screw-insert-bottom-radius 1.65) (+ screw-insert-top-radius 1.65) (+ screw-insert-height 1.5)))
 (def screw-insert-screw-holes (screw-insert-all-shapes 1.7 1.7 350))
 
-(def holder (rotate (deg2rad 0) [0 0 1]
-                    (rotate (deg2rad 90) [1 0 0]
-                    (import "../things/controller holder.stl"))))
 
-(spit "things/test2.scad" (write-scad holder))
+
+(def usb-holder (mirror [-1 0 0]
+                    (import "../things/holder v6.stl")))
+
+(def usb-holder (translate [-41 38 bottom-height] usb-holder))
+(def usb-holder-space
+  (translate [0 0 (/ (+  bottom-height 8.2) 2)]
+  (extrude-linear {:height (+ bottom-height 8.2) :twist 0 :convexity 0}
+                  (offset 0.05
+                          (project usb-holder)))))
+
+(spit "things/test2.scad" (write-scad usb-holder))
 
 
 (def model-outline
@@ -586,7 +581,6 @@
                          screw-insert-outers
                          )
                   usb-holder-space
-                  usb-holder-notch
                   screw-insert-holes
                   ))
     (translate [0 0 -20] (cube 350 350 40))))
@@ -612,7 +606,7 @@
                         )
             (debug key-space-below)
             (debug thumb-space-below)
-            (debug usb-holder-space)
+            (debug usb-holder)
             )
           (translate [0 0 -20] (cube 350 350 40)))))
 
@@ -649,7 +643,6 @@
                ))
   )
 
-
 (def wall-shape (cut (translate [0 0 -0.1] (difference case-walls usb-holder-space))))
 
 (def bottom-height-half (/ bottom-height 2))
@@ -676,7 +669,7 @@
   (translate [0 0 (- layer-height screw-head-height)]
              (screw-insert-all-shapes 1 1 (- bottom-height screw-head-height))))
 
-(spit "things/test2.scad" (write-scad (union bottom-screw-holes-head bottom-screw-holes-top) ))
+;(spit "things/test2.scad" (write-scad (union bottom-screw-holes-head bottom-screw-holes-top) ))
 (spit "things/right-plate-print.scad"
       (write-scad
         (difference
