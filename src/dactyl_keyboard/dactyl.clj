@@ -16,7 +16,7 @@
 
 (def column-curvature (deg2rad 17))                         ; 15                        ; curvature of the columns
 (def row-curvature (deg2rad 6))                             ; 5                   ; curvature of the rows
-(def centerrow 1.25)                              ; controls front-back tilt
+(def centerrow 1.75)                              ; controls front-back tilt
 (def centercol 3)                                           ; controls left-right tilt / tenting (higher number is more tenting)
 (def tenting-angle (deg2rad 15))                            ; or, change this for more precise tenting control
 (def column-style
@@ -330,20 +330,10 @@
        (translate thumborigin)
        (translate move)))
 
-;original concave
-(defn thumb-r-place [shape] (thumb-place [14 -15 10] [-15 -10 5] shape)) ; right
-(defn thumb-m-place [shape] (thumb-place [10 -23 25] [-35 -16 -2] shape)) ; middle
-(defn thumb-l-place [shape] (thumb-place [6 -32 35] [-51 -25 -11.5] shape)) ; left
-
-; convex
-(defn thumb-r-place [shape] (thumb-place [14 -32 10] [-15 -10 5] shape)) ; right
-(defn thumb-m-place [shape] (thumb-place [10 -23 20] [-33 -15 -4.5] shape)) ; middle
-(defn thumb-l-place [shape] (thumb-place [6 -15 35] [-51.5 -24.5 -11.5] shape)) ; left
-
 ; convexer
 (defn thumb-r-place [shape] (thumb-place [14 -40 10] [-15 -10 5] shape)) ; right
 (defn thumb-m-place [shape] (thumb-place [10 -23 20] [-33 -15 -6] shape)) ; middle
-(defn thumb-l-place [shape] (thumb-place [6 -10 35] [-51.5 -24.5 -12.2] shape)) ; left
+(defn thumb-l-place [shape] (thumb-place [6 -10 35] [-52 -25 -12.2] shape)) ; left
 
 (defn thumb-layout [shape]
   (union
@@ -417,26 +407,47 @@
       (key-place 0 cornerrow (translate (wall-locate1 -1 0) fat-web-post-bl))
       (key-place 0 cornerrow (translate (wall-locate2 -1 0) web-post-bl))
       (key-place 0 cornerrow web-post-bl)
-      (thumb-r-place web-post-tr)
+      ;(thumb-r-place web-post-tr)
       (thumb-r-place web-post-tl)
       (thumb-m-place web-post-tr)
       (key-place 0 cornerrow (translate (wall-locate3 -1 0) web-post-bl))
       )
-    (hull
+    (triangle-hulls
+      (key-place 0 cornerrow fat-web-post-bl)
+      (key-place 0 cornerrow fat-web-post-br)
+      (thumb-r-place web-post-tl)
+      (key-place 1 cornerrow web-post-bl)
+      (thumb-r-place fat-web-post-tr)
+      (key-place 1 cornerrow web-post-br)
+      (key-place 2 lastrow web-post-tl)
+      )
+    (triangle-hulls
+      (key-place 2 lastrow web-post-tl)
+      (thumb-r-place fat-web-post-tr)
+      (key-place 2 lastrow web-post-bl)
+      (thumb-r-place fat-web-post-br)
+      )
+    (triangle-hulls
+      (thumb-r-place web-post-br)
+      (key-place 2 lastrow web-post-bl)
+      (key-place 3 lastrow web-post-bl)
+      (key-place 2 lastrow web-post-br)
+      )
+    #_(hull
       (thumb-r-place web-post-tr)                           ; top ridge finger side
       (thumb-r-place web-post-tl)                           ; need extra thickness otherwise wall gets thinner than a single extrusion
       (key-place 0 cornerrow web-post-bl)
       (key-place 0 cornerrow web-post-br))
-    (piramid-hulls                                          ; infill between top ridge and fingers
+    #_(piramid-hulls                                          ; infill between top ridge and fingers
       (thumb-r-place fat-web-post-tr)
       (key-place 0 cornerrow web-post-br)
       (key-place 1 cornerrow web-post-bl)
       (key-place 1 cornerrow web-post-br)
       (thumb-r-place fat-web-post-br))
-    (triangle-hulls
-      (key-place 2 lastrow web-post-tl)
-      (key-place 1 cornerrow web-post-br)
-      (key-place 2 lastrow web-post-bl)
+    #_(triangle-hulls
+      ;(key-place 2 lastrow web-post-tl)
+      ;(key-place 1 cornerrow web-post-br)
+      ;(key-place 2 lastrow web-post-bl)
       (thumb-r-place web-post-br)
       (key-place 2 lastrow web-post-br)
       (key-place 3 lastrow web-post-bl))
@@ -598,7 +609,7 @@
             connectors
             thumb
             thumb-connectors
-            (difference (union case-walls
+            #_(difference (union case-walls
                                screw-insert-outers
                                )
                         usb-holder-space
@@ -606,7 +617,7 @@
                         )
             (debug key-space-below)
             (debug thumb-space-below)
-            (debug usb-holder)
+            #_(debug usb-holder)
             )
           (translate [0 0 -20] (cube 350 350 40)))))
 
@@ -619,20 +630,6 @@
             thumbcaps
             )
           (translate [0 0 -20] (cube 350 350 40)))))
-;
-;(spit "things/right-test.scad"
-;      (write-scad
-;       (difference
-;        (union
-;         key-holes
-;         connectors
-;         thumb
-;         thumb-connectors
-;         case-walls
-;         thumbcaps
-;         caps)
-;
-;        (translate [0 0 -20] (cube 350 350 40)))))
 
 (def wall-shape
   (cut
