@@ -23,16 +23,16 @@
   (if (> nrows 5) :orthographic :standard))
 (defn column-offset [column] (cond
                                (= column 2) [0 5 -3]
-                               (= column 3) [0 0 -1.5]
+                               (= column 3) [0 0 -0.5]
                                (>= column 4) [0 -10 6]
                                :else [0 0 0]))
 
-(def thumb-offsets [6 -3 1])
+(def thumb-offsets [10 -5 1])
 
 (def keyboard-z-offset 7)                                   ; controls overall height; original=9 with centercol=3; use 16 for centercol=2
 (def bottom-height 2)                                    ; plexiglass plate or printed plate
-(def extra-width 2.5)                                       ; extra space between the base of keys; original= 2
-(def extra-height 0.5)                                      ; original= 0.5
+(def extra-width 3)                                       ; extra space between the base of keys; original= 2
+(def extra-height -0.5)                                      ; original= 0.5
 
 (def wall-z-offset -1)                                      ; -5                ; original=-15 length of the first downward-sloping part of the wall (negative)
 (def wall-xy-offset 1)
@@ -333,7 +333,7 @@
 ; convexer
 (defn thumb-r-place [shape] (thumb-place [14 -40 10] [-15 -10 5] shape)) ; right
 (defn thumb-m-place [shape] (thumb-place [10 -23 20] [-33 -15 -6] shape)) ; middle
-(defn thumb-l-place [shape] (thumb-place [6 -10 35] [-52 -25 -12.2] shape)) ; left
+(defn thumb-l-place [shape] (thumb-place [6 -5 35] [-52.5 -25.5 -11.5] shape)) ; left
 
 (defn thumb-layout [shape]
   (union
@@ -413,10 +413,14 @@
       (key-place 0 cornerrow (translate (wall-locate3 -1 0) web-post-bl))
       )
     (triangle-hulls
-      (key-place 0 cornerrow fat-web-post-bl)
       (key-place 0 cornerrow fat-web-post-br)
+      (key-place 0 cornerrow fat-web-post-bl)
       (thumb-r-place web-post-tl)
       (key-place 1 cornerrow web-post-bl)
+      (key-place 1 cornerrow web-post-br)
+      )
+    (triangle-hulls
+      (thumb-r-place fat-web-post-tl)
       (thumb-r-place fat-web-post-tr)
       (key-place 1 cornerrow web-post-br)
       (key-place 2 lastrow web-post-tl)
@@ -433,24 +437,6 @@
       (key-place 3 lastrow web-post-bl)
       (key-place 2 lastrow web-post-br)
       )
-    #_(hull
-      (thumb-r-place web-post-tr)                           ; top ridge finger side
-      (thumb-r-place web-post-tl)                           ; need extra thickness otherwise wall gets thinner than a single extrusion
-      (key-place 0 cornerrow web-post-bl)
-      (key-place 0 cornerrow web-post-br))
-    #_(piramid-hulls                                          ; infill between top ridge and fingers
-      (thumb-r-place fat-web-post-tr)
-      (key-place 0 cornerrow web-post-br)
-      (key-place 1 cornerrow web-post-bl)
-      (key-place 1 cornerrow web-post-br)
-      (thumb-r-place fat-web-post-br))
-    #_(triangle-hulls
-      ;(key-place 2 lastrow web-post-tl)
-      ;(key-place 1 cornerrow web-post-br)
-      ;(key-place 2 lastrow web-post-bl)
-      (thumb-r-place web-post-br)
-      (key-place 2 lastrow web-post-br)
-      (key-place 3 lastrow web-post-bl))
     ))
 
 ; dx1, dy1, dx2, dy2 = direction of the wall. '1' for front, '-1' for back, '0' for 'not in this direction'.
@@ -538,12 +524,12 @@
          (translate (map + offset [(first position) (second position) (/ height 2)])))))
 
 (defn screw-insert-all-shapes [bottom-radius top-radius height]
-  (union (screw-insert 2 0 bottom-radius top-radius height [-4 5.5 bottom-height]) ; top middle
-         (screw-insert 0 1 bottom-radius top-radius height [-4.5 -8 bottom-height]) ; left
-         (screw-insert 0 lastrow bottom-radius top-radius height [-14 -3 bottom-height]) ;thumb
-         (screw-insert (- lastcol 1) lastrow bottom-radius top-radius height [9 13.9 bottom-height]) ; bottom right
-         (screw-insert (- lastcol 1) 0 bottom-radius top-radius height [9 6 bottom-height]) ; top right
-         (screw-insert 2 (+ lastrow 1) bottom-radius top-radius height [0 7 bottom-height]))) ;bottom middle
+  (union (screw-insert 2 0 bottom-radius top-radius height [-4 4.5 bottom-height]) ; top middle
+         (screw-insert 0 1 bottom-radius top-radius height [-5.3 -8 bottom-height]) ; left
+         (screw-insert 0 lastrow bottom-radius top-radius height [-12 -7 bottom-height]) ;thumb
+         (screw-insert (- lastcol 1) lastrow bottom-radius top-radius height [10 13.5 bottom-height]) ; bottom right
+         (screw-insert (- lastcol 1) 0 bottom-radius top-radius height [10 5 bottom-height]) ; top right
+         (screw-insert 2 (+ lastrow 1) bottom-radius top-radius height [0 6.5 bottom-height]))) ;bottom middle
 
 ; Hole Depth Y: 4.4
 (def screw-insert-height 4)
@@ -562,11 +548,11 @@
 (def usb-holder (mirror [-1 0 0]
                     (import "../things/holder v6.stl")))
 
-(def usb-holder (translate [-41 38 bottom-height] usb-holder))
+(def usb-holder (translate [-40.8 45.5 bottom-height] usb-holder))
 (def usb-holder-space
   (translate [0 0 (/ (+  bottom-height 8.2) 2)]
   (extrude-linear {:height (+ bottom-height 8.2) :twist 0 :convexity 0}
-                  (offset 0.05
+                  (offset 0.1
                           (project usb-holder)))))
 
 (spit "things/test2.scad" (write-scad usb-holder))
@@ -609,7 +595,9 @@
             connectors
             thumb
             thumb-connectors
-            #_(difference (union case-walls
+            caps
+            thumbcaps
+            (difference (union case-walls
                                screw-insert-outers
                                )
                         usb-holder-space
@@ -617,7 +605,7 @@
                         )
             (debug key-space-below)
             (debug thumb-space-below)
-            #_(debug usb-holder)
+            (debug usb-holder)
             )
           (translate [0 0 -20] (cube 350 350 40)))))
 
