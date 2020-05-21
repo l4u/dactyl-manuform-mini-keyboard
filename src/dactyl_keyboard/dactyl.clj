@@ -546,7 +546,7 @@
 
 
 (def usb-holder (mirror [-1 0 0]
-                    (import "../things/holder v6.stl")))
+                    (import "../things/holder v8.stl")))
 
 (def usb-holder (translate [-40.8 45.5 bottom-height] usb-holder))
 (def usb-holder-space
