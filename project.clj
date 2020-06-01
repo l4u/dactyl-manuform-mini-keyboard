@@ -8,6 +8,6 @@
             [lein-exec "0.3.7"]]
   :aliases {"generate" ["exec" "-p" "src/dactyl_keyboard/dactyl.clj"]}
   :dependencies [[org.clojure/clojure "1.7.0"]
-                 [scad-clj "0.4.0"]])
+                 [scad-clj "0.5.3"]])
 
 
