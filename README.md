@@ -7,6 +7,7 @@ Build log: https://www.beekeeb.com/dactyl-manuform-mini-mechanical-keyboard-buil
 ## Forks
 
 - https://github.com/lebastaq/dactyl-manuform-mini-keyboard
+- https://github.com/okke-formsma/dactyl-manuform-tight
 
 ## Features
 
