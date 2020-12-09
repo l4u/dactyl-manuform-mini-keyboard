@@ -24,12 +24,13 @@
 (defn column-offset [column] (cond
                                (= column 2) [0 5 -3]
                                (= column 3) [0 0 -0.5]
-                               (>= column 4) [0 -10 6]
+                               (= column 4) [0 -10 6]
+                               (= column 5) [0 -15 6]
                                :else [0 0 0]))
 
 (def thumb-offsets [10 -5 1])
 
-(def keyboard-z-offset 7)                                   ; controls overall height; original=9 with centercol=3; use 16 for centercol=2
+(def keyboard-z-offset 10)                                   ; controls overall height; original=9 with centercol=3; use 16 for centercol=2
 (def bottom-height 2)                                    ; plexiglass plate or printed plate
 (def extra-width 3)                                       ; extra space between the base of keys; original= 2
 (def extra-height -0.5)                                      ; original= 0.5
@@ -37,7 +38,7 @@
 (def wall-z-offset -1)                                      ; -5                ; original=-15 length of the first downward-sloping part of the wall (negative)
 (def wall-xy-offset 1)
 
-(def wall-thickness 2)                                      ; wall thickness parameter; originally 5
+(def wall-thickness 3)                                      ; wall thickness parameter; originally 5
 
 ; If you use Cherry MX or Gateron switches, this can be turned on.
 ; If you use other switches such as Kailh, you should set this as false
@@ -59,6 +60,7 @@
 (def keyswitch-width 14)
 (def plate-thickness 2)
 (def keyswitch-below-plate (- 8 plate-thickness))           ; approx space needed below keyswitch
+(def keyswitch-row-space 0.25)
 
 (def sa-profile-key-height 12.7)
 
@@ -66,7 +68,7 @@
 (def retention-tab-thickness 1.5)
 (def retention-tab-hole-thickness (- plate-thickness retention-tab-thickness))
 (def mount-width (+ keyswitch-width 3))
-(def mount-height (+ keyswitch-height 3))
+(def mount-height (+ (+ keyswitch-height 3) (* keyswitch-row-space 2)))
 
 ;for the bottom
 (def filled-plate
@@ -74,9 +76,9 @@
        (translate [0 0 (/ plate-thickness 2)])
        ))
 (def single-plate
-  (let [top-wall (->> (cube (+ keyswitch-width 3) 1.5 plate-thickness)
+  (let [top-wall (->> (cube (+ keyswitch-width 3) (+ keyswitch-row-space 1.5) plate-thickness)
                       (translate [0
-                                  (+ (/ 1.5 2) (/ keyswitch-height 2))
+                                  (+ (/ (+ keyswitch-row-space 1.5) 2) (/ keyswitch-height 2))
                                   (/ plate-thickness 2)]))
         left-wall (->> (cube 1.5 (+ keyswitch-height 3) plate-thickness)
                        (translate [(+ (/ 1.5 2) (/ keyswitch-width 2))
@@ -524,23 +526,24 @@
          (translate (map + offset [(first position) (second position) (/ height 2)])))))
 
 (defn screw-insert-all-shapes [bottom-radius top-radius height]
-  (union (screw-insert 2 0 bottom-radius top-radius height [-4 4.5 bottom-height]) ; top middle
+  (union (screw-insert 2 0 bottom-radius top-radius height [-3.5 5 bottom-height]) ; top middle
          (screw-insert 0 1 bottom-radius top-radius height [-5.3 -8 bottom-height]) ; left
          (screw-insert 0 lastrow bottom-radius top-radius height [-12 -7 bottom-height]) ;thumb
-         (screw-insert (- lastcol 1) lastrow bottom-radius top-radius height [10 13.5 bottom-height]) ; bottom right
-         (screw-insert (- lastcol 1) 0 bottom-radius top-radius height [10 5 bottom-height]) ; top right
+         (screw-insert (- lastcol 1) lastrow bottom-radius top-radius height [10 12.5 bottom-height]) ; bottom right
+         (screw-insert (- lastcol 1) 0 bottom-radius top-radius height [10 2 bottom-height]) ; top right
          (screw-insert 2 (+ lastrow 1) bottom-radius top-radius height [0 6.5 bottom-height]))) ;bottom middle
 
 ; Hole Depth Y: 4.4
-(def screw-insert-height 4)
+(def screw-insert-height 5.5)
 
 ; Hole Diameter C: 4.1-4.4
-(def screw-insert-bottom-radius (/ 4.0 2))
-(def screw-insert-top-radius (/ 3.9 2))
+(def screw-insert-bottom-radius (/ 3.0 2))
+(def screw-insert-top-radius (/ 2.9 2))
 (def screw-insert-holes (screw-insert-all-shapes screw-insert-bottom-radius screw-insert-top-radius screw-insert-height))
 
 ; Wall Thickness W:\t1.65
-(def screw-insert-outers (screw-insert-all-shapes (+ screw-insert-bottom-radius 1.65) (+ screw-insert-top-radius 1.65) (+ screw-insert-height 1.5)))
+(def screw-insert-wall 2.5)
+(def screw-insert-outers (screw-insert-all-shapes (+ screw-insert-bottom-radius screw-insert-wall) (+ screw-insert-top-radius screw-insert-wall) (+ screw-insert-height screw-insert-wall)))
 (def screw-insert-screw-holes (screw-insert-all-shapes 1.7 1.7 350))
 
 
@@ -548,7 +551,7 @@
 (def usb-holder (mirror [-1 0 0]
                     (import "../things/holder v8.stl")))
 
-(def usb-holder (translate [-40.8 45.5 bottom-height] usb-holder))
+(def usb-holder (translate [-40.8 47.5 bottom-height] usb-holder))
 (def usb-holder-space
   (translate [0 0 (/ (+  bottom-height 8.2) 2)]
   (extrude-linear {:height (+ bottom-height 8.2) :twist 0 :convexity 0}
