@@ -38,7 +38,7 @@
 (def wall-z-offset -1)                                      ; -5                ; original=-15 length of the first downward-sloping part of the wall (negative)
 (def wall-xy-offset 1)
 
-(def wall-thickness 3)                                      ; wall thickness parameter; originally 5
+(def wall-thickness 2)                                      ; wall thickness parameter; originally 5
 
 ; If you use Cherry MX or Gateron switches, this can be turned on.
 ; If you use other switches such as Kailh, you should set this as false
@@ -533,20 +533,40 @@
          (screw-insert (- lastcol 1) 0 bottom-radius top-radius height [10 2 bottom-height]) ; top right
          (screw-insert 2 (+ lastrow 1) bottom-radius top-radius height [0 6.5 bottom-height]))) ;bottom middle
 
+(defn screw-insert-rib-shape [rib-wall height extra-size]
+  (->> (binding [*fn* 30]
+         (cube rib-wall (+ (/ rib-wall 2) extra-size) height))))
+
+(defn screw-insert-rib [column row rib-wall height offset extra-size angle]
+  (let [position (key-position column row [0 0 0])]
+    (->> (screw-insert-rib-shape rib-wall height extra-size)
+         (translate [0 (+ (/ rib-wall 4) (/ extra-size 2)) 0])
+         (rotate [0 0 (deg2rad angle)])
+         (translate (map + offset [(first position) (second position) (/ height 2)])))))
+
+(defn screw-insert-rib-all-shapes [rib-wall height]
+  (union (screw-insert-rib 2 0 rib-wall height [-3.5 5 bottom-height] 0 50) ; top middle
+         (screw-insert-rib 0 1 rib-wall height [-5.3 -8 bottom-height] 0 90) ; left
+         (screw-insert-rib 0 lastrow rib-wall height [-12 -7 bottom-height] 0.5 35) ;thumb
+         (screw-insert-rib (- lastcol 1) lastrow rib-wall height [10 12.5 bottom-height] 0 150) ; bottom right
+         (screw-insert-rib (- lastcol 1) 0 rib-wall height [10 2 bottom-height] 0.25 -38) ; top right
+         (screw-insert-rib 2 (+ lastrow 1) rib-wall height [0 6.5 bottom-height] 0 180))) ;bottom middle
+
 ; Hole Depth Y: 4.4
 (def screw-insert-height 5.5)
 
 ; Hole Diameter C: 4.1-4.4
 (def screw-insert-bottom-radius (/ 3.0 2))
-(def screw-insert-top-radius (/ 2.9 2))
+(def screw-insert-top-radius (/ 3.0 2))
 (def screw-insert-holes (screw-insert-all-shapes screw-insert-bottom-radius screw-insert-top-radius screw-insert-height))
 
 ; Wall Thickness W:\t1.65
 (def screw-insert-wall 2.5)
 (def screw-insert-outers (screw-insert-all-shapes (+ screw-insert-bottom-radius screw-insert-wall) (+ screw-insert-top-radius screw-insert-wall) (+ screw-insert-height screw-insert-wall)))
 (def screw-insert-screw-holes (screw-insert-all-shapes 1.7 1.7 350))
-
-
+; Rib
+(def screw-insert-rib-wall (* (+ screw-insert-bottom-radius screw-insert-wall) 2))
+(def screw-insert-ribs (screw-insert-rib-all-shapes screw-insert-rib-wall (+ screw-insert-height screw-insert-wall)))
 
 (def usb-holder (mirror [-1 0 0]
                     (import "../things/holder v8.stl")))
@@ -579,6 +599,7 @@
       thumb-connectors
       (difference (union case-walls
                          screw-insert-outers
+                         screw-insert-ribs
                          )
                   usb-holder-space
                   screw-insert-holes
