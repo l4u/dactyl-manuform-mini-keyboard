@@ -8,6 +8,7 @@ Build log: https://www.beekeeb.com/dactyl-manuform-mini-mechanical-keyboard-buil
 
 - https://github.com/lebastaq/dactyl-manuform-mini-keyboard
 - https://github.com/okke-formsma/dactyl-manuform-tight
+- https://github.com/carbonfet/dactyl-manuform
 - [Track Beast](https://github.com/davekincade/dactyl-manuform-mini-keyboard/tree/dk-track-beast)
 - [Tractyl ManuForm Keyboard](https://github.com/noahprince22/tractyl-manuform-keyboard)
 
