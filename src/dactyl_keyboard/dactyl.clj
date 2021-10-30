@@ -11,6 +11,18 @@
 (defn replace-last [coll x]
   (concat (butlast coll) [x]))
 
+;@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+;;quality settings;;;;;;;;;;;
+;@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+(def wall-step 0.2)
+(def wall-sphere-n 30) ;;30 for high quality Sphere resolution, lower for faster renders mainly present on case edge top.  can effect wall thickness
+(def circle_facets 100)  ;;100 for high quality
+(def switch-type 1)
+(def hot_swappable 1)
+(def sla_tolerance 1)
+
+(def cherry-keyswitch-height 14.4) ;; Was 14.1, then 14.25
+(def cherry-keyswitch-width 14.4)
 ;;;;;;;;;;;;;;;;;;;;;;
 ;; Shape parameters ;;
 ;;;;;;;;;;;;;;;;;;;;;;
@@ -95,78 +107,152 @@
 (def mount-width (+ keyswitch-width 3))
 (def mount-height (+ keyswitch-height 3))
 
-(def single-plate
-  (let [top-wall (->> (cube (+ keyswitch-width 3) 1.5 plate-thickness)
+;@@@@@@@@@@@@@@@@@@@@@
+;switch hole code;;;;;
+;@@@@@@@@@@@@@@@@@@@@@
+			
+
+(def Kalih_features ;;Contains the solder points and the protruding circles
+			(union 
+			(->> (union
+					(->> (cylinder 1.65 1.5)(with-fn circle_facets)(translate [0 0 0]));;increased diameter by .02
+					(difference	;;this is for making the slope for the left hole.
+						(->> (cylinder 1.65 4)(with-fn circle_facets)(rotate (deg2rad 35) [1 0 0]));;increased diameter by .02
+						(->>(cube 4 4 4)(translate [0 -2 0])))	
+					(->> (cylinder 1.6 1.5)(with-fn circle_facets)(translate [6.35 2.540 0]))
+					(->>(difference	;;this is for making the slope for the right hole.
+						(->> (cylinder 1.6 3.2)(with-fn circle_facets))
+						(->>(cube 4 4 4)(translate [0 -2 0])))
+						(rotate (deg2rad 15) [1 0 0])(translate [6.35 2.540 0.5]))							
+				) (translate [-3.17 -1.27 1.65]))
+				(->> (cube 2.7 1.9 1.8)(translate [6.8 1.5 0])) ;right solder point on kalih socket
+				(->> (cube 2.7 1.9 1.8)(translate [-6.8 -1.5 0]));;left solder point
+				)
+		)
+
+(def kalih_socket
+	(difference
+		(union (cube 12 (+  sla_tolerance 6) ( + 1.825 sla_tolerance)) 
+		Kalih_features)
+		(->> (cube 3.7   4  3)(translate [4.1 (- -3.05 (/ sla_tolerance 2)) 0])) ;;		(->> (cube 3.2 3 3)(translate [4.1 -2.6 0]))			
+))
+
+(def kalih_socket_thumbs
+	(difference
+		(union (cube 12 (+  sla_tolerance 6.3) ( + 2 sla_tolerance)) 
+		Kalih_features)
+		(->> (cube 3.7   4  3)(translate [4.1 (- -3.05 (/ sla_tolerance 2)) 0])) ;;		(->> (cube 3.2 3 3)(translate [4.1 -2.6 0]))	
+))
+
+(def kalih_tab
+	(union
+		(->> (difference 
+				(->>( cube 9 2.7 1.5)(translate [0 2.95 -2.25]) )
+				(->> (cube 9.1 1 2.5)(translate [0 0.9 -2.45])(rotate (deg2rad 15) [1 0 0]))  ;decreased translate y by ;;controls the clip in part of the kalih socket holder overhang
+		))
+		(difference
+			(->>( cube 3.8 2.3 1.)(translate [-3.6 -4.1 -2.0]) )  ;;to prevent cracking decreased cube y from 2.3 to 2
+			;(->> (cube 4.8 1.8 0.9)(rotate (deg2rad 55) [1 0 0])(translate [-3.6 -3.25 -2.6]))
+)))
+(def kalih_tab_thumb
+	(union
+		(->> (difference 
+				(->>( cube 9 2.7 1.5)(translate [0 2.95 -2.25]) )
+				(->> (cube 9.1 1 2.5)(translate [0 1.1 -2.45])(rotate (deg2rad 15) [1 0 0]))  ;decreased translate y by ;;controls the clip in part of the kalih socket holder overhang
+		))
+		(difference
+			(->>( cube 3.8 2.7 1.)(translate [-3.6 -4. -2.0]) )  ;;to prevent cracking decreased cube y from 2.3 to 2
+			;(->> (cube 4.8 1.8 0.9)(rotate (deg2rad 55) [1 0 0])(translate [-3.6 -3.25 -2.6]))
+)))
+
+(def kalih_cutout
+	(->>(union 
+			(difference
+				(union 
+					(->> (cube 11 17.6 3.2)(translate [ 0 -4.5 0]))		;main box that the switch is cut from
+					(->>(cube 17.4 17.6 1)(translate [ 0.7 -4.5 1.1])) ;bottom cover that covers the remainder of the bottom of the switch hole
+					kalih_tab
+				)
+				#_(->> (cube 11 9.4 3)(translate [ 0 -0.4 0]))
+				(->> kalih_socket(translate [-0.4 -0.6 -0.71]))
+				(->> (cylinder (+ (/ sla_tolerance 2) 2.1) 4)(with-fn circle_facets)(translate [0.3 -4.5 0]))
+				(->>(cube 20 10 5)(translate [0 -13 0]))    ;;This cuts out part of the bottom cover.  Used to ensure drainage when SLA printing.
+		))
+	(translate [-0.7 4.5 -1]))
+)
+
+(def kalih_cutout_thumb
+	(->>(union 
+			(difference
+				(union 
+					(->> (cube 11 17.6 3.2)(translate [ 0 -4.5 0]))		;main box that the switch is cut from
+					(->>(cube 17.4 17.6 1)(translate [ 0.7 -4.5 1.1])) ;bottom cover that covers the remainder of the bottom of the switch hole
+					kalih_tab_thumb
+				)
+				#_(->> (cube 11 9.4 3)(translate [ 0 -0.4 0]))
+				(->> kalih_socket_thumbs(translate [-0.4 -0.6 -0.71]))
+				(->> (cylinder (+ (/ sla_tolerance 2) 2.1) 4)(with-fn circle_facets)(translate [0.3 -4.5 0]))
+				(->>(cube 20 10 5)(translate [0 -13 0]))    ;;This cuts out part of the bottom cover.  Used to ensure drainage when SLA printing.
+		))
+	(translate [-0.7 4.5 -1]))
+)
+
+
+(def MX_Clone_hole_hotswap  ;;Special hole for hotswap holes because the box has to be a bit bigger so it makes contact with the kalih cutout.
+	(->>(difference 
+		(union
+			
+			(->>(cube 17.5, 17.6, 5)(translate [0 0 -0.9]))   ;;Main box that everything is cut from
+		)
+		(->>(cube 14.8, 13.8, 6)(translate [0 0 -1]) ) ;;Inner square cut out
+		(->>(cube 14.2, 15., 4.32)(translate [0, 0, -2])) ;;The buttom inner cut out.  This modifies the notch height
+		(->> (cube 3.7,15.,  6)(translate [(/ 8.5 2), 0, -1]));Left and right rectangle cut out.  Controls the width of notch
+		(->> (cube 3.7,15.,  6)(translate [(/ -8.5 2), 0, -1]))
+	)(translate [0, 0 4.]))
+
+)		
+(def hotswap_hole_sla
+	(->>(union 
+		MX_Clone_hole_hotswap
+		(->> kalih_cutout (translate [0 0 0]))
+	)(translate [0 0 0])(rotate (deg2rad 180) [0 0 1]))
+)
+
+(def hotswap_hole_sla_thumb
+	(->>(union 
+		MX_Clone_hole_hotswap
+		(->> kalih_cutout_thumb (translate [0 0 0]))
+	)(rotate (deg2rad 180) [0 0 1]))
+
+)
+
+;Cherry
+(def cherry-single-plate
+  (let [top-wall (->> (cube (+ cherry-keyswitch-width 3) 1.5 plate-thickness)
                       (translate [0
-                                  (+ (/ 1.5 2) (/ keyswitch-height 2))
+                                  (+ (/ 1.5 2) (/ cherry-keyswitch-height 2))
                                   (/ plate-thickness 2)]))
-        left-wall (->> (cube 1.5 (+ keyswitch-height 3) plate-thickness)
-                       (translate [(+ (/ 1.5 2) (/ keyswitch-width 2))
+        left-wall (->> (cube 1.5 (+ cherry-keyswitch-height 3) plate-thickness)
+                       (translate [(+ (/ 1.5 2) (/ cherry-keyswitch-width 2))
                                    0
                                    (/ plate-thickness 2)]))
         side-nub (->> (binding [*fn* 30] (cylinder 1 2.75))
                       (rotate (/ π 2) [1 0 0])
-                      (translate [(+ (/ keyswitch-width 2)) 0 1])
+                      (translate [(+ (/ cherry-keyswitch-width 2)) 0 1])
                       (hull (->> (cube 1.5 2.75 plate-thickness)
-                                 (translate [(+ (/ 1.5 2) (/ keyswitch-width 2))
+                                 (translate [(+ (/ 1.5 2) (/ cherry-keyswitch-width 2))
                                              0
                                              (/ plate-thickness 2)]))))
-        plate-half (union top-wall
-                          left-wall
-                         (if create-side-nubs? (with-fn 100 side-nub) ()))
-        swap-holder (->> (cube (+ keyswitch-width 3) (/ (+ keyswitch-height 3) 2) 3)
-                         (translate [0 (/ (+ keyswitch-height 3) 4) -1.5]))
-        main-axis-hole (->> (cylinder (/ 4.0 2) 10)
-                            (with-fn 12))
-        plus-hole (->> (cylinder (/ 2.9 2) 10)
-                       (with-fn 8)
-                       (translate [-3.81 2.54 0]))
-        minus-hole (->> (cylinder (/ 2.9 2) 10)
-                        (with-fn 8)
-                        (translate [2.54 5.08 0]))
-        friction-hole (->> (cylinder (/ 1.7 2) 10)
-                           (with-fn 8))
-        friction-hole-right (translate [5 0 0] friction-hole)
-        friction-hole-left (translate [-5 0 0] friction-hole)
-        hotswap-base-shape (->> (cube 14 5.80 1.8)
-                                (translate [-1 4 -2.1]))
-        hotswap-base-hold-shape (->> (cube (/ 10 2) (- 6.2 4) 1.8)
-                                     (translate [(/ 12 4) (/ (- 6.2 4) 1) -2.1]))
-        hotswap-pad (cube 4.0 3.0 2)
-        hotswap-pad-plus (translate [(- 0 (+ (/ 12.9 2) (/ 2.55 2))) 2.54 -2.1]
-                                    hotswap-pad)
-        hotswap-pad-minus (translate [(+ (/ 10.9 2) (/ 2.55 2)) 5.08 -2.1]
-                                     hotswap-pad)
-        wire-track (cube 4 (+ keyswitch-height 3) 1.8)
-        column-wire-track (->> wire-track
-                               (translate [9.5 0 -2.4]))
-        diode-wire-track (->> (cube 2 10 1.8)
-                              (translate [-7 8 -2.1]))
-        hotswap-base (union
-                      (difference hotswap-base-shape
-                                  hotswap-base-hold-shape)
-                      hotswap-pad-plus
-                      hotswap-pad-minus)
-        diode-holder (->> (cube 2 4 1.8)
-                          (translate [-7 5 -2.1]))
-        hotswap-holder (difference swap-holder
-                                   main-axis-hole
-                                   plus-hole
-                                   (mirror [-1 0 0] plus-hole)
-                                   minus-hole
-                                   (mirror [-1 0 0] minus-hole)
-                                   friction-hole-left
-                                   friction-hole-right
-                                   hotswap-base
-                                   (mirror [-1 0 0] hotswap-base))]
-    (difference (union plate-half
-                       (->> plate-half
-                            (mirror [1 0 0])
-                            (mirror [0 1 0]))
-                       hotswap-holder)
-                #_diode-holder
-                #_diode-wire-track
-                column-wire-track)))
+        plate-half (union top-wall left-wall (with-fn 100 side-nub))]
+    (union plate-half
+           (->> plate-half
+                (mirror [1 0 0])
+                (mirror [0 1 0])))))
+(def single-plate
+	;(if (== hot_swappable 1) (->> (union (->> MX_Clone_hole(rotate (/ π 2) [0 0 1])) (->> kalih_cutout)(rotate (/ π 2) [0 0 1])))
+	(if (== hot_swappable 1) (->> hotswap_hole_sla (translate [0 0 -1.6]))
+	(if (== switch-type 1) cherry-single-plate )))
+
 
 ;;;;;;;;;;;;;;;;
 ;; SA Keycaps ;;
