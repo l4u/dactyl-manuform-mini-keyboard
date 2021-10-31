@@ -14,8 +14,6 @@
 ;@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 ;;quality settings;;;;;;;;;;;
 ;@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-(def wall-step 0.2)
-(def wall-sphere-n 30) ;;30 for high quality Sphere resolution, lower for faster renders mainly present on case edge top.  can effect wall thickness
 (def circle_facets 100)  ;;100 for high quality
 (def switch-type 1)
 (def hot_swappable 1)
@@ -56,16 +54,16 @@
           (>= column 4) [0 -12 5.64]    ; original [0 -5.8 5.64]
           :else [0 0 0])))
 
-(def thumb-offsets [6 -3 7])
+(def thumb-offsets [6 -3 4])
 
 (def keyboard-z-offset 16)               ; controls overall height; original=9 with centercol=3; use 16 for centercol=2
 
 (def extra-width 2.5)                   ; extra space between the base of keys; original= 2
 (def extra-height 1.0)                  ; original= 0.5
 
-(def wall-z-offset -6)                 ; length of the first downward-sloping part of the wall (negative)
-(def wall-xy-offset 5)                  ; offset in the x and/or y direction for the first downward-sloping part of the wall (negative)
-(def wall-thickness 2)                  ; wall thickness parameter; originally 5
+(def wall-z-offset -15)                 ; length of the first downward-sloping part of the wall (negative)
+(def wall-xy-offset 6)                  ; offset in the x and/or y direction for the first downward-sloping part of the wall (negative)
+(def wall-thickness 2.5)                  ; wall thickness parameter; originally 5
 
 ;; Settings for column-style == :fixed
 ;; The defaults roughly match Maltron settings
@@ -151,7 +149,7 @@
 				(->> (cube 9.1 1 2.5)(translate [0 0.9 -2.45])(rotate (deg2rad 15) [1 0 0]))  ;decreased translate y by ;;controls the clip in part of the kalih socket holder overhang
 		))
 		(difference
-			(->>( cube 3.8 2.3 1.)(translate [-3.6 -4.1 -2.0]) )  ;;to prevent cracking decreased cube y from 2.3 to 2
+			(->>( cube 3.8 2.3 2.4)(translate [-3.6 -4.1 -2.0]) )  ;;to prevent cracking decreased cube y from 2.3 to 2
 			;(->> (cube 4.8 1.8 0.9)(rotate (deg2rad 55) [1 0 0])(translate [-3.6 -3.25 -2.6]))
 )))
 (def kalih_tab_thumb
@@ -161,7 +159,7 @@
 				(->> (cube 9.1 1 2.5)(translate [0 1.1 -2.45])(rotate (deg2rad 15) [1 0 0]))  ;decreased translate y by ;;controls the clip in part of the kalih socket holder overhang
 		))
 		(difference
-			(->>( cube 3.8 2.7 1.)(translate [-3.6 -4. -2.0]) )  ;;to prevent cracking decreased cube y from 2.3 to 2
+			(->>( cube 3.8 2.7 2.4)(translate [-3.6 -4. -2.0]) )  ;;to prevent cracking decreased cube y from 2.3 to 2
 			;(->> (cube 4.8 1.8 0.9)(rotate (deg2rad 55) [1 0 0])(translate [-3.6 -3.25 -2.6]))
 )))
 
@@ -436,8 +434,8 @@
 ;; Web Connectors ;;
 ;;;;;;;;;;;;;;;;;;;;
 
-(def web-thickness 4.5)
-(def post-size 0.1)
+(def web-thickness 5.5)
+(def post-size 0.2)
 (def web-post (->> (cube post-size post-size web-thickness)
                    (translate [0 0 (+ (/ web-thickness -2)
                                       plate-thickness)])))
@@ -1472,8 +1470,8 @@
     (def screw-offset-tr [-3.5 6.5 0])
     (def screw-offset-br [-3.5 -6.5 0]))
 (when (and (false? pinky-15u) (false? extra-row))
-    (def screw-offset-tr [-2.5 8.5 0])
-    (def screw-offset-br [-5.5 14 0]))
+    (def screw-offset-tr [-2.5 9.5 0])
+    (def screw-offset-br [-7.5 14 0]))
     
 ; Offsets for the screw inserts dependent on thumb-style & inner-column
 (when (and (= thumb-style "cf") inner-column)
@@ -1481,7 +1479,7 @@
     (def screw-offset-tm [9.5 -4.5 0])
     (def screw-offset-bm [13 -7 0]))
 (when (and (= thumb-style "cf") (false? inner-column))
-    (def screw-offset-bl [-12.5 1.5 0])
+    (def screw-offset-bl [-9.5 1.5 0])
     (def screw-offset-tm [10.5 -4.5 0])
     (def screw-offset-bm [10 -5.5 0]))
 (when (and (= thumb-style "mini") inner-column)
