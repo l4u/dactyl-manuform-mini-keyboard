@@ -31,8 +31,8 @@
 (def α (/ π 12))                        ; curvature of the columns
 (def β (/ π 36))                        ; curvature of the rows
 (def centerrow (- nrows 3))             ; controls front-back tilt
-(def centercol 3)                       ; controls left-right tilt / tenting (higher number is more tenting)
-(def tenting-angle (/ π 6))            ; or, change this for more precise tenting control
+(def centercol 4)                       ; controls left-right tilt / tenting (higher number is more tenting)
+(def tenting-angle (/ π 9))            ; or, change this for more precise tenting control
 
 (def pinky-15u false)                   ; controls whether the outer column uses 1.5u keys
 (def first-15u-row 0)                   ; controls which should be the first row to have 1.5u keys on the outer column
@@ -54,16 +54,16 @@
           (>= column 4) [0 -12 5.64]    ; original [0 -5.8 5.64]
           :else [0 0 0])))
 
-(def thumb-offsets [6 -3 4])
+(def thumb-offsets [6 -3 7])
 
-(def keyboard-z-offset 16)               ; controls overall height; original=9 with centercol=3; use 16 for centercol=2
+(def keyboard-z-offset 6)               ; controls overall height; original=9 with centercol=3; use 16 for centercol=2
 
 (def extra-width 2.5)                   ; extra space between the base of keys; original= 2
 (def extra-height 1.0)                  ; original= 0.5
 
-(def wall-z-offset -15)                 ; length of the first downward-sloping part of the wall (negative)
-(def wall-xy-offset 6)                  ; offset in the x and/or y direction for the first downward-sloping part of the wall (negative)
-(def wall-thickness 2.5)                  ; wall thickness parameter; originally 5
+(def wall-z-offset -8)                 ; length of the first downward-sloping part of the wall (negative)
+(def wall-xy-offset 5)                  ; offset in the x and/or y direction for the first downward-sloping part of the wall (negative)
+(def wall-thickness 2)                  ; wall thickness parameter; originally 5
 
 ;; Settings for column-style == :fixed
 ;; The defaults roughly match Maltron settings
@@ -77,7 +77,7 @@
 
 ; If you use Cherry MX or Gateron switches, this can be turned on.
 ; If you use other switches such as Kailh, you should set this as false
-(def create-side-nubs? false)
+(def create-side-nubs? true)
 
 ;;;;;;;;;;;;;;;;;;;;;;;
 ;; General variables ;;
@@ -93,163 +93,55 @@
 ;; Switch Hole ;;
 ;;;;;;;;;;;;;;;;;
 
-(def keyswitch-height 14.4)
-(def keyswitch-width 14.4)
+(def keyswitch-height 14.15)
+(def keyswitch-width 14.15)
 
 (def sa-profile-key-height 12.7)
 
-(def plate-thickness 5)
+(def plate-thickness 4)
 (def side-nub-thickness 4)
 (def retention-tab-thickness 1.5)
 (def retention-tab-hole-thickness (- (+ plate-thickness 0.5) retention-tab-thickness))
-(def mount-width (+ keyswitch-width 3))
-(def mount-height (+ keyswitch-height 3))
+(def mount-width (+ keyswitch-width 3.2))
+(def mount-height (+ keyswitch-height 2.7))
 
-;@@@@@@@@@@@@@@@@@@@@@
-;switch hole code;;;;;
-;@@@@@@@@@@@@@@@@@@@@@
-			
-
-(def Kalih_features ;;Contains the solder points and the protruding circles
-			(union 
-			(->> (union
-					(->> (cylinder 1.65 1.5)(with-fn circle_facets)(translate [0 0 0]));;increased diameter by .02
-					(difference	;;this is for making the slope for the left hole.
-						(->> (cylinder 1.65 4)(with-fn circle_facets)(rotate (deg2rad 35) [1 0 0]));;increased diameter by .02
-						(->>(cube 4 4 4)(translate [0 -2 0])))	
-					(->> (cylinder 1.6 1.5)(with-fn circle_facets)(translate [6.35 2.540 0]))
-					(->>(difference	;;this is for making the slope for the right hole.
-						(->> (cylinder 1.6 3.2)(with-fn circle_facets))
-						(->>(cube 4 4 4)(translate [0 -2 0])))
-						(rotate (deg2rad 15) [1 0 0])(translate [6.35 2.540 0.5]))							
-				) (translate [-3.17 -1.27 1.65]))
-				(->> (cube 2.7 1.9 1.8)(translate [6.8 1.5 0])) ;right solder point on kalih socket
-				(->> (cube 2.7 1.9 1.8)(translate [-6.8 -1.5 0]));;left solder point
-				)
-		)
-
-(def kalih_socket
-	(difference
-		(union (cube 12 (+  sla_tolerance 6) ( + 1.825 sla_tolerance)) 
-		Kalih_features)
-		(->> (cube 3.7   4  3)(translate [4.1 (- -3.05 (/ sla_tolerance 2)) 0])) ;;		(->> (cube 3.2 3 3)(translate [4.1 -2.6 0]))			
-))
-
-(def kalih_socket_thumbs
-	(difference
-		(union (cube 12 (+  sla_tolerance 6.3) ( + 2 sla_tolerance)) 
-		Kalih_features)
-		(->> (cube 3.7   4  3)(translate [4.1 (- -3.05 (/ sla_tolerance 2)) 0])) ;;		(->> (cube 3.2 3 3)(translate [4.1 -2.6 0]))	
-))
-
-(def kalih_tab
-	(union
-		(->> (difference 
-				(->>( cube 9 2.7 1.5)(translate [0 2.95 -2.25]) )
-				(->> (cube 9.1 1 2.5)(translate [0 0.9 -2.45])(rotate (deg2rad 15) [1 0 0]))  ;decreased translate y by ;;controls the clip in part of the kalih socket holder overhang
-		))
-		(difference
-			(->>( cube 3.8 2.3 2.4)(translate [-3.6 -4.1 -2.0]) )  ;;to prevent cracking decreased cube y from 2.3 to 2
-			;(->> (cube 4.8 1.8 0.9)(rotate (deg2rad 55) [1 0 0])(translate [-3.6 -3.25 -2.6]))
-)))
-(def kalih_tab_thumb
-	(union
-		(->> (difference 
-				(->>( cube 9 2.7 1.5)(translate [0 2.95 -2.25]) )
-				(->> (cube 9.1 1 2.5)(translate [0 1.1 -2.45])(rotate (deg2rad 15) [1 0 0]))  ;decreased translate y by ;;controls the clip in part of the kalih socket holder overhang
-		))
-		(difference
-			(->>( cube 3.8 2.7 2.4)(translate [-3.6 -4. -2.0]) )  ;;to prevent cracking decreased cube y from 2.3 to 2
-			;(->> (cube 4.8 1.8 0.9)(rotate (deg2rad 55) [1 0 0])(translate [-3.6 -3.25 -2.6]))
-)))
-
-(def kalih_cutout
-	(->>(union 
-			(difference
-				(union 
-					(->> (cube 11 17.6 3.2)(translate [ 0 -4.5 0]))		;main box that the switch is cut from
-					(->>(cube 17.4 17.6 1)(translate [ 0.7 -4.5 1.1])) ;bottom cover that covers the remainder of the bottom of the switch hole
-					kalih_tab
-				)
-				#_(->> (cube 11 9.4 3)(translate [ 0 -0.4 0]))
-				(->> kalih_socket(translate [-0.4 -0.6 -0.71]))
-				(->> (cylinder (+ (/ sla_tolerance 2) 2.1) 4)(with-fn circle_facets)(translate [0.3 -4.5 0]))
-				(->>(cube 20 10 5)(translate [0 -13 0]))    ;;This cuts out part of the bottom cover.  Used to ensure drainage when SLA printing.
-		))
-	(translate [-0.7 4.5 -1]))
-)
-
-(def kalih_cutout_thumb
-	(->>(union 
-			(difference
-				(union 
-					(->> (cube 11 17.6 3.2)(translate [ 0 -4.5 0]))		;main box that the switch is cut from
-					(->>(cube 17.4 17.6 1)(translate [ 0.7 -4.5 1.1])) ;bottom cover that covers the remainder of the bottom of the switch hole
-					kalih_tab_thumb
-				)
-				#_(->> (cube 11 9.4 3)(translate [ 0 -0.4 0]))
-				(->> kalih_socket_thumbs(translate [-0.4 -0.6 -0.71]))
-				(->> (cylinder (+ (/ sla_tolerance 2) 2.1) 4)(with-fn circle_facets)(translate [0.3 -4.5 0]))
-				(->>(cube 20 10 5)(translate [0 -13 0]))    ;;This cuts out part of the bottom cover.  Used to ensure drainage when SLA printing.
-		))
-	(translate [-0.7 4.5 -1]))
-)
-
-
-(def MX_Clone_hole_hotswap  ;;Special hole for hotswap holes because the box has to be a bit bigger so it makes contact with the kalih cutout.
-	(->>(difference 
-		(union
-			
-			(->>(cube 17.5, 17.6, 5)(translate [0 0 -0.9]))   ;;Main box that everything is cut from
-		)
-		(->>(cube 14.8, 13.8, 6)(translate [0 0 -1]) ) ;;Inner square cut out
-		(->>(cube 14.2, 15., 4.32)(translate [0, 0, -2])) ;;The buttom inner cut out.  This modifies the notch height
-		(->> (cube 3.7,15.,  6)(translate [(/ 8.5 2), 0, -1]));Left and right rectangle cut out.  Controls the width of notch
-		(->> (cube 3.7,15.,  6)(translate [(/ -8.5 2), 0, -1]))
-	)(translate [0, 0 4.]))
-
-)		
-(def hotswap_hole_sla
-	(->>(union 
-		MX_Clone_hole_hotswap
-		(->> kalih_cutout (translate [0 0 0]))
-	)(translate [0 0 0])(rotate (deg2rad 180) [0 0 1]))
-)
-
-(def hotswap_hole_sla_thumb
-	(->>(union 
-		MX_Clone_hole_hotswap
-		(->> kalih_cutout_thumb (translate [0 0 0]))
-	)(rotate (deg2rad 180) [0 0 1]))
-
-)
-
-;Cherry
-(def cherry-single-plate
-  (let [top-wall (->> (cube (+ cherry-keyswitch-width 3) 1.5 plate-thickness)
+(def single-plate
+  (let [top-wall (->> (cube (+ keyswitch-width 3) 1.5 (+ plate-thickness 0.5))
                       (translate [0
-                                  (+ (/ 1.5 2) (/ cherry-keyswitch-height 2))
-                                  (/ plate-thickness 2)]))
-        left-wall (->> (cube 1.5 (+ cherry-keyswitch-height 3) plate-thickness)
-                       (translate [(+ (/ 1.5 2) (/ cherry-keyswitch-width 2))
+                                  (+ (/ 1.5 2) (/ keyswitch-height 2))
+                                  (- (/ plate-thickness 2) 0.25)]))
+        left-wall (->> (cube 1.8 (+ keyswitch-height 3) (+ plate-thickness 0.5))
+                       (translate [(+ (/ 1.8 2) (/ keyswitch-width 2))
                                    0
-                                   (/ plate-thickness 2)]))
+                                   (- (/ plate-thickness 2) 0.25)]))
         side-nub (->> (binding [*fn* 30] (cylinder 1 2.75))
                       (rotate (/ π 2) [1 0 0])
-                      (translate [(+ (/ cherry-keyswitch-width 2)) 0 1])
-                      (hull (->> (cube 1.5 2.75 plate-thickness)
-                                 (translate [(+ (/ 1.5 2) (/ cherry-keyswitch-width 2))
+                      (translate [(+ (/ keyswitch-width 2)) 0 1])
+                      (hull (->> (cube 1.5 2.75 side-nub-thickness)
+                                 (translate [(+ (/ 1.5 2) (/ keyswitch-width 2))
                                              0
-                                             (/ plate-thickness 2)]))))
-        plate-half (union top-wall left-wall (with-fn 100 side-nub))]
-    (union plate-half
-           (->> plate-half
-                (mirror [1 0 0])
-                (mirror [0 1 0])))))
-(def single-plate
-	;(if (== hot_swappable 1) (->> (union (->> MX_Clone_hole(rotate (/ π 2) [0 0 1])) (->> kalih_cutout)(rotate (/ π 2) [0 0 1])))
-	(if (== hot_swappable 1) (->> hotswap_hole_sla (translate [0 0 -1.6]))
-	(if (== switch-type 1) cherry-single-plate )))
+                                             (/ side-nub-thickness 2)])))
+                      (translate [0 0 (- plate-thickness side-nub-thickness)]))
+        plate-half (union top-wall left-wall (if create-side-nubs? (with-fn 100 side-nub)))
+        top-nub (->> (cube 5 5 retention-tab-hole-thickness)
+                     (translate [(+ (/ keyswitch-width 2.5)) 0 (- (/ retention-tab-hole-thickness 2) 0.5)]))
+        top-nub-pair (union top-nub
+                            (->> top-nub
+                                 (mirror [1 0 0])
+                                 (mirror [0 1 0])))
+        hotswap_holder (->> ( import "../src/dactyl_keyboard/hot_swap_plate_mod.stl")
+                            (translate [0 0 3.5])
+                            )
+        ]
+    (difference
+     (union hotswap_holder
+            plate-half
+            (->> plate-half
+                 (mirror [1 0 0])
+                 (mirror [0 1 0])))
+     (->>
+      top-nub-pair
+      (rotate (/ π 2) [0 0 1])))))
 
 
 ;;;;;;;;;;;;;;;;
@@ -434,8 +326,8 @@
 ;; Web Connectors ;;
 ;;;;;;;;;;;;;;;;;;;;
 
-(def web-thickness 5.5)
-(def post-size 0.2)
+(def web-thickness 4.8)
+(def post-size 0.1)
 (def web-post (->> (cube post-size post-size web-thickness)
                    (translate [0 0 (+ (/ web-thickness -2)
                                       plate-thickness)])))
@@ -1470,8 +1362,8 @@
     (def screw-offset-tr [-3.5 6.5 0])
     (def screw-offset-br [-3.5 -6.5 0]))
 (when (and (false? pinky-15u) (false? extra-row))
-    (def screw-offset-tr [-2.5 9.5 0])
-    (def screw-offset-br [-7.5 14 0]))
+    (def screw-offset-tr [-2.7 9.5 0])
+    (def screw-offset-br [-6.0 13.5 0]))
     
 ; Offsets for the screw inserts dependent on thumb-style & inner-column
 (when (and (= thumb-style "cf") inner-column)
@@ -1481,7 +1373,7 @@
 (when (and (= thumb-style "cf") (false? inner-column))
     (def screw-offset-bl [-9.5 1.5 0])
     (def screw-offset-tm [10.5 -4.5 0])
-    (def screw-offset-bm [10 -5.5 0]))
+    (def screw-offset-bm [12.5  -5.5 0]))
 (when (and (= thumb-style "mini") inner-column)
     (def screw-offset-bl [14 8 0])
     (def screw-offset-tm [9.5 -4.5 0])
@@ -1500,7 +1392,7 @@
     (def screw-offset-bm [8 -1 0]))
 
          (defn screw-insert-all-shapes [bottom-radius top-radius height]
-  (union (screw-insert 0 0         bottom-radius top-radius height [7.5 10.5 0])
+  (union (screw-insert 0 0         bottom-radius top-radius height [7.0 10.5 0])
          (screw-insert 0 lastrow   bottom-radius top-radius height screw-offset-bl)
          (screw-insert lastcol lastrow  bottom-radius top-radius height screw-offset-br)
          (screw-insert lastcol 0         bottom-radius top-radius height screw-offset-tr)
