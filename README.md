@@ -14,16 +14,15 @@ Build log: https://www.beekeeb.com/dactyl-manuform-mini-mechanical-keyboard-buil
 - [Compactyl](https://github.com/dereknheiley/dactyl-manuform-tight)
 
 ## Features
-
+- Added hot-swap holders.
 - The use of sidenubs can be disabled. Sidenub should be disabled if you use Kailh, and Outemu. If you use Cherry MX, Gateron or Zealios switches, you can enable the sidenubs.
 - Spaces for rentention tabs are added.
 - One key in the thumb cluster has been removed. Other thumb keys are also adjusted.
 - The total height is reduced and wire posts are removed. This results in a
   higher printing speed and a lower cost.
-- A TRRS mount instead of a RJ9 mount is used.
 - A micro USB mount is used. A breakout board, or an extension cable can be used.
 - Screw posts are moved inside. The holes are designed for TRISERT® thread inserts 145m3.
-- The pro micro holder has been modified. Dupont cables can be used.
+- Used external controllers holder.
 
 ## Generate OpenSCAD and STL models
 
@@ -37,7 +36,7 @@ Build log: https://www.beekeeb.com/dactyl-manuform-mini-mechanical-keyboard-buil
 
 ## License
 
-Copyright © 2015-2018 Matthew Adereth, Tom Short and Leo Lou
+Copyright © 2015-2023 Matthew Adereth, Tom Short and Leo Lou (upgraded by Grigory Rylov)
 
 The source code for generating the models is distributed under the [GNU AFFERO GENERAL PUBLIC LICENSE Version 3](LICENSE).
 
