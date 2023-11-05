@@ -15,7 +15,7 @@
 (def nrows 4)
 (def ncols 6)
 
-(def column-curvature (deg2rad 20))                         ; 15                  ; curvature of the columns
+(def column-curvature (deg2rad 20))                         ; 15                        ; curvature of the columns
 (def row-curvature (deg2rad 6))                             ; 5                   ; curvature of the rows
 
 (def centerrow (- nrows 3))             ; controls front-back tilt
@@ -31,6 +31,14 @@
 ;external case for controller and ports
 (def external-controller true)
 
+; magnet holes for external wrist rest
+(def magnet-height 2)
+(def magnet-booster-width 1)
+(def magnet-rad 5)
+(def magnet-wall-width 1)
+(def magnet-inner-rad 1.5)
+(def magnet-holes false)
+
 ; If you want hot swap sockets enable this
 (def hot-swap false)
 (def plate-height 3)
@@ -38,7 +46,7 @@
                                (= column 2) [0 2.82 -4.5]
                                (>= column 4) [0 -12 5.64]            ; original [0 -5.8 5.64]
                                (< column 2) [0 -5.8 3]
-                               :else [0 0 0]))                       ; ring finger
+                               :else [0 0 0])) ; безымянный
 
 (def thumb-offsets [6 -3 7])
 
@@ -368,13 +376,13 @@
 
 (if (true? pinky-15u)
   (do (def wide-post-tr (translate [(- (/ mount-width 1.2) post-adj)  (- (/ mount-height  2) post-adj) 0] web-post))
-      (def wide-post-tl (translate [(+ (/ mount-width -1.2) post-adj) (- (/ mount-height  2) post-adj) 0] web-post))
-      (def wide-post-bl (translate [(+ (/ mount-width -1.2) post-adj) (+ (/ mount-height -2) post-adj) 0] web-post))
-      (def wide-post-br (translate [(- (/ mount-width 1.2) post-adj)  (+ (/ mount-height -2) post-adj) 0] web-post)))
+    (def wide-post-tl (translate [(+ (/ mount-width -1.2) post-adj) (- (/ mount-height  2) post-adj) 0] web-post))
+    (def wide-post-bl (translate [(+ (/ mount-width -1.2) post-adj) (+ (/ mount-height -2) post-adj) 0] web-post))
+    (def wide-post-br (translate [(- (/ mount-width 1.2) post-adj)  (+ (/ mount-height -2) post-adj) 0] web-post)))
   (do (def wide-post-tr web-post-tr)
-      (def wide-post-tl web-post-tl)
-      (def wide-post-bl web-post-bl)
-      (def wide-post-br web-post-br)))
+    (def wide-post-tl web-post-tl)
+    (def wide-post-bl web-post-bl)
+    (def wide-post-br web-post-br)))
 
 (defn triangle-hulls [& shapes]
   (apply union
@@ -485,8 +493,8 @@
   (union
    (thumb-1x-layout single-plate)
    (thumb-15x-layout single-plate)
-  ; (thumb-15x-layout larger-plate)
-))
+   ; (thumb-15x-layout larger-plate)
+   ))
 
 (def thumb-post-tr (translate [(- (/ mount-width 2) post-adj)  (- (/ mount-height  2) post-adj) 0] web-post))
 (def thumb-post-tl (translate [(+ (/ mount-width -2) post-adj) (- (/ mount-height  2) post-adj) 0] web-post))
@@ -729,9 +737,9 @@
         shift-up      (and (not (or shift-right shift-left)) (= row 0))
         shift-down    (and (not (or shift-right shift-left)) (>= row lastrow))
         position      (if shift-up     (key-position column row (map + (wall-locate2  0  1) [0 (/ mount-height 2) 0]))
-                          (if shift-down  (key-position column row (map - (wall-locate2  0 -1) [0 (/ mount-height 2) 0]))
-                              (if shift-left (map + (left-key-position row 0) (wall-locate3 -1 0))
-                                  (key-position column row (map + (wall-locate2  1  0) [(/ mount-width 2) 0 0])))))]
+                        (if shift-down  (key-position column row (map - (wall-locate2  0 -1) [0 (/ mount-height 2) 0]))
+                          (if shift-left (map + (left-key-position row 0) (wall-locate3 -1 0))
+                            (key-position column row (map + (wall-locate2  1  0) [(/ mount-width 2) 0 0])))))]
     (->> (screw-insert-shape bottom-radius top-radius height)
          (translate (map + offset [(first position) (second position) (/ height 2)])))))
 
@@ -777,12 +785,60 @@
              (key-place lastcol (inc row) web-post-tr)
              (key-place lastcol (inc row) wide-post-tr)))
           ;;
-)))
+          )))
 
 (def pinky-walls
   (union
    (key-wall-brace lastcol cornerrow 0 -1 web-post-br lastcol cornerrow 0 -1 wide-post-br)
    (key-wall-brace lastcol 0 0 1 web-post-tr lastcol 0 0 1 wide-post-tr)))
+
+;;;;;;;;;;;;;;;;;
+;; Magnet hole ;;
+;;;;;;;;;;;;;;;;;
+(defn magnet-hole  [radius inner-radius height]
+  (rotate [0 (deg2rad 90) (deg2rad 90)]
+          (union
+           (binding [*fn* 100] (cylinder radius height))
+           (binding [*fn* 100] (cylinder inner-radius (+ height 10))
+             )
+           )
+          )
+  )
+
+(defn magnet-stiffness-booster  [side height]
+  (rotate [0 (deg2rad 90) (deg2rad 90)]
+          (cube side side height)
+          )
+  )
+
+
+(defn magnet-hole-insert [column row offset shape]
+  (let [shift-right   (= column lastcol)
+        shift-left    (= column 0)
+        shift-up      (and (not (or shift-right shift-left)) (= row 0))
+        shift-down    (and (not (or shift-right shift-left)) (>= row lastrow))
+        position      (if shift-up     (key-position column row (map + (wall-locate2  0  1) [0 (/ mount-height 2) 0]))
+                        (if shift-down  (key-position column row (map - (wall-locate2  0 -1) [0 (/ mount-height 2) 0]))
+                          (if shift-left (map + (left-key-position row 0) (wall-locate3 -1 0))
+                            (key-position column row (map + (wall-locate2  1  0) [(/ mount-width 2) 0 0])))))]
+    (->> shape (translate (map + offset [(first position) (second position) (+ magnet-rad magnet-wall-width)])))))
+
+
+(def magnet-place (union
+                   (magnet-hole-insert 4, 2, [0 -13 0] (magnet-hole magnet-rad magnet-inner-rad magnet-height))
+                   (magnet-hole-insert 3, 3, [0 0.75 0] (magnet-hole magnet-rad magnet-inner-rad magnet-height))
+                   )
+  )
+
+(def magnet-stiffness-booster (union
+                               (magnet-hole-insert 4, 2, [0 (+ -13 wall-thickness) 0]
+                                                   (magnet-stiffness-booster (+ (* magnet-rad 2) 2) magnet-booster-width)
+                                                   )
+                               (magnet-hole-insert 3, 3, [0 (+ 0.75 wall-thickness) 0]
+                                                   (magnet-stiffness-booster (+ (* magnet-rad 2) 2) magnet-booster-width)
+                                                   )
+                               )
+  )
 
 (def model-right (difference
                   (union
@@ -793,10 +849,12 @@
                    thumb
                    thumb-connectors
                    (difference (union case-walls
+                                      (if magnet-holes magnet-stiffness-booster)
                                       screw-insert-outers)
                                usb-holder-space
                                usb-holder-notch
                                screw-insert-holes
+                               (if magnet-holes magnet-place)
                                ))
                   (translate [0 0 -20] (cube 350 350 40))))
 
