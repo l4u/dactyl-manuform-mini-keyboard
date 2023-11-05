@@ -37,10 +37,10 @@
 (def magnet-rad 5)
 (def magnet-wall-width 1)
 (def magnet-inner-rad 1.5)
-(def magnet-holes false)
+(def magnet-holes true)
 
 ; If you want hot swap sockets enable this
-(def hot-swap false)
+(def hot-swap true)
 (def plate-height 3)
 (defn column-offset [column] (cond
                                (= column 2) [0 2.82 -4.5]
