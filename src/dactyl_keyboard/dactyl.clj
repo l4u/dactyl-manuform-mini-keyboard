@@ -30,6 +30,7 @@
 
 ;external case for controller and ports
 (def external-controller true)
+(def external-controller-height 13)
 
 ; magnet holes for external wrist rest
 (def magnet-height 2)
@@ -717,8 +718,8 @@
 ; Cutout for controller/trrs jack holder https://github.com/rianadon/dactyl-configurator/blob/main/src/connectors.md
 (def usb-holder-ref (key-position 0 0 (map - (wall-locate2  0  -1) [0 (/ mount-height 2) 0])))
 (def usb-holder-position (map + [(+ 18.8 holder-offset) 18.7 1.3] [(first usb-holder-ref) (second usb-holder-ref) 2]))
-(def usb-holder-space  (translate (map + usb-holder-position [-1.5 (* -1 wall-thickness) 4.4]) (cube 28.666 30 15.4)))
-(def usb-holder-notch  (translate (map + usb-holder-position [-1.5 (+ 4.75 notch-offset) 4.4]) (cube 31.366 1.3 15.4)))
+(def usb-holder-space  (translate (map + usb-holder-position [-1.5 (* -1 wall-thickness) 0]) (cube 28.666 30 external-controller-height)))
+(def usb-holder-notch  (translate (map + usb-holder-position [-1.5 (+ 4.75 notch-offset) 0]) (cube 31.366 1.3 external-controller-height)))
 (def trrs-notch        (translate (map + usb-holder-position [-10.33 (+ 3.6 notch-offset) 6.6]) (cube 8.4 2.4 19.8)))
 
 ;;;;;;;;;;;
@@ -825,8 +826,8 @@
 
 
 (def magnet-place (union
-                   (magnet-hole-insert 4, 2, [0 -13 0] (magnet-hole magnet-rad magnet-inner-rad magnet-height))
-                   (magnet-hole-insert 3, 3, [0 0.75 0] (magnet-hole magnet-rad magnet-inner-rad magnet-height))
+                   (magnet-hole-insert 4, 2, [0 -13 0] (magnet-hole (+ magnet-rad 0.1) magnet-inner-rad magnet-height))
+                   (magnet-hole-insert 3, 3, [0 0.75 0] (magnet-hole (+ magnet-rad 0.1) magnet-inner-rad magnet-height))
                    )
   )
 
