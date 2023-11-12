@@ -3,7 +3,7 @@ controllerWidth = 23;
 controllerLen = 53.5;
 controllerHeight = 1;
 
-buttonAdditionalHeight = 4;
+buttonAdditionalHeight = 4.5;
 controllerBoxHeight = 9;
 controllerWallWidth = 1;
 controllerBottomHeight = 1;

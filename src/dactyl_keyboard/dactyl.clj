@@ -30,7 +30,9 @@
 
 ;external case for controller and ports
 (def external-controller true)
-(def external-controller-height 13)
+(def external-controller-height 13.5)
+(def external-controller-step 1.5)
+(def external-controller-width 31.666)
 
 ; magnet holes for external wrist rest
 (def magnet-height 2)
@@ -38,7 +40,7 @@
 (def magnet-rad 5)
 (def magnet-wall-width 1)
 (def magnet-inner-rad 1.5)
-(def magnet-holes true)
+(def magnet-holes false)
 
 ; If you want hot swap sockets enable this
 (def hot-swap true)
@@ -187,7 +189,7 @@
    )
   )
 
-(def single-plate
+(def single-plate-right
   (let [top-wall (->> (cube (+ keyswitch-width 3) 1.5 plate-thickness)
                       (translate [0
                                   (+ (/ 1.5 2) (/ keyswitch-height 2))
@@ -217,6 +219,41 @@
                  (mirror [1 0 0])
                  (mirror [0 1 0]))
             (if hot-swap (mirror [0 0 0] hot-socket))
+            )
+     (->>
+      top-nub-pair
+      (rotate (/ π 2) [0 0 1])))))
+
+(def single-plate-left
+  (let [top-wall (->> (cube (+ keyswitch-width 3) 1.5 plate-thickness)
+                      (translate [0
+                                  (+ (/ 1.5 2) (/ keyswitch-height 2))
+                                  (/ plate-thickness 2)]))
+        left-wall (->> (cube 1.5 (+ keyswitch-height 3) plate-thickness)
+                       (translate [(+ (/ 1.5 2) (/ keyswitch-width 2))
+                                   0
+                                   (/ plate-thickness 2)]))
+        side-nub (->> (binding [*fn* 30] (cylinder 1 2.75))
+                      (rotate (/ π 2) [1 0 0])
+                      (translate [(+ (/ keyswitch-width 2)) 0 1])
+                      (hull (->> (cube 1.5 2.75 side-nub-thickness)
+                                 (translate [(+ (/ 1.5 2) (/ keyswitch-width 2))
+                                             0
+                                             (/ side-nub-thickness 2)])))
+                      (translate [0 0 (- plate-thickness side-nub-thickness)]))
+        plate-half (union top-wall left-wall (if create-side-nubs? (with-fn 100 side-nub)))
+        top-nub (->> (cube 5 5 retention-tab-hole-thickness)
+                     (translate [(+ (/ keyswitch-width 2)) 0 (/ retention-tab-hole-thickness 2)]))
+        top-nub-pair (union top-nub
+                            (->> top-nub
+                                 (mirror [1 0 0])
+                                 (mirror [0 1 0])))]
+    (difference
+     (union plate-half
+            (->> plate-half
+                 (mirror [1 0 0])
+                 (mirror [0 1 0]))
+            (if hot-swap (mirror [1 0 0] hot-socket))
             )
      (->>
       top-nub-pair
@@ -339,15 +376,23 @@
 (defn key-position [column row position]
   (apply-key-geometry (partial map +) rotate-around-x rotate-around-y column row position))
 
-(def key-holes
+(def key-holes-right
   (apply union
          (for [column columns
                row rows
                :when (or (.contains [2 3] column)
                          (not= row lastrow))]
-           (->> single-plate
+           (->> single-plate-right
                 (key-place column row)))))
 
+(def key-holes-left
+  (apply union
+         (for [column columns
+               row rows
+               :when (or (.contains [2 3] column)
+                         (not= row lastrow))]
+           (->> single-plate-left
+                (key-place column row)))))
 (def caps
   (apply union
          (for [column columns
@@ -490,10 +535,17 @@
    (thumb-1x-layout (sa-cap 1))
    (thumb-15x-layout (rotate (/ π 2) [0 0 1] (sa-cap 1)))))
 
-(def thumb
+(def thumb-right
   (union
-   (thumb-1x-layout single-plate)
-   (thumb-15x-layout single-plate)
+   (thumb-1x-layout single-plate-right)
+   (thumb-15x-layout single-plate-right)
+   ; (thumb-15x-layout larger-plate)
+   ))
+
+(def thumb-left
+  (union
+   (thumb-1x-layout single-plate-left)
+   (thumb-15x-layout single-plate-left)
    ; (thumb-15x-layout larger-plate)
    ))
 
@@ -697,17 +749,31 @@
     (thumb-bl-place (translate (wall-locate3 -0.3 1) web-post-tr))
     (thumb-tl-place web-post-tl))))
 
+(defn shape-insert [column row offset shape]
+  (let [shift-right   (= column lastcol)
+        shift-left    (= column 0)
+        shift-up      (and (not (or shift-right shift-left)) (= row 0))
+        shift-down    (and (not (or shift-right shift-left)) (>= row lastrow))
+        position      (if shift-up     (key-position column row (map + (wall-locate2  0  1) [0 (/ mount-height 2) 0]))
+                        (if shift-down  (key-position column row (map - (wall-locate2  0 -1) [0 (/ mount-height 2) 0]))
+                          (if shift-left (map + (left-key-position row 0) (wall-locate3 -1 0))
+                            (key-position column row (map + (wall-locate2  1  0) [(/ mount-width 2) 0 0])))))]
+    (->> shape (translate (map + offset [(first position) (second position) (+ magnet-rad magnet-wall-width)])))))
+
+
 ;;;;;;;;;;;;;;;;;;;;;
 ;; CONTOLLER HOLES ;;
 ;;;;;;;;;;;;;;;;;;;;;
 ; Offsets for the controller/trrs holder cutout
 (def holder-offset
   (case nrows
-    4 -3.5
+    4 -2.5
     5 0
     6 (if inner-column
         3.2
-        2.2)))
+        2.2)
+    )
+  )
 
 (def notch-offset
   (case nrows
@@ -716,11 +782,20 @@
     6 -5.07))
 
 ; Cutout for controller/trrs jack holder https://github.com/rianadon/dactyl-configurator/blob/main/src/connectors.md
-(def usb-holder-ref (key-position 0 0 (map - (wall-locate2  0  -1) [0 (/ mount-height 2) 0])))
-(def usb-holder-position (map + [(+ 18.8 holder-offset) 18.7 1.3] [(first usb-holder-ref) (second usb-holder-ref) 2]))
-(def usb-holder-space  (translate (map + usb-holder-position [-1.5 (* -1 wall-thickness) 0]) (cube 28.666 30 external-controller-height)))
-(def usb-holder-notch  (translate (map + usb-holder-position [-1.5 (+ 4.75 notch-offset) 0]) (cube 31.366 1.3 external-controller-height)))
-(def trrs-notch        (translate (map + usb-holder-position [-10.33 (+ 3.6 notch-offset) 6.6]) (cube 8.4 2.4 19.8)))
+(defn usb-holder-hole [width step height]
+  (union
+   (translate [0, (* -1 step), 0] (cube (- width (* step 2)), (* step  4), height ))
+   (translate [0, step, 0] (cube width, step, height))
+   (translate [0, (* -1 step), 0] (cube width, step, height))
+   ))
+
+(def left-offset -8)
+(def usb-holder-hole-space
+  (shape-insert 1, 0, [left-offset -1 (+ -6  (/ external-controller-height 2))]
+                (usb-holder-hole external-controller-width external-controller-step external-controller-height)
+                )
+  )
+
 
 ;;;;;;;;;;;
 ;; SCREW ;;
@@ -812,30 +887,17 @@
           )
   )
 
-
-(defn magnet-hole-insert [column row offset shape]
-  (let [shift-right   (= column lastcol)
-        shift-left    (= column 0)
-        shift-up      (and (not (or shift-right shift-left)) (= row 0))
-        shift-down    (and (not (or shift-right shift-left)) (>= row lastrow))
-        position      (if shift-up     (key-position column row (map + (wall-locate2  0  1) [0 (/ mount-height 2) 0]))
-                        (if shift-down  (key-position column row (map - (wall-locate2  0 -1) [0 (/ mount-height 2) 0]))
-                          (if shift-left (map + (left-key-position row 0) (wall-locate3 -1 0))
-                            (key-position column row (map + (wall-locate2  1  0) [(/ mount-width 2) 0 0])))))]
-    (->> shape (translate (map + offset [(first position) (second position) (+ magnet-rad magnet-wall-width)])))))
-
-
 (def magnet-place (union
-                   (magnet-hole-insert 4, 2, [0 -13 0] (magnet-hole (+ magnet-rad 0.1) magnet-inner-rad magnet-height))
-                   (magnet-hole-insert 3, 3, [0 0.75 0] (magnet-hole (+ magnet-rad 0.1) magnet-inner-rad magnet-height))
+                   (shape-insert 4, 2, [0 -13 0] (magnet-hole (+ magnet-rad 0.1) magnet-inner-rad magnet-height))
+                   (shape-insert 3, 3, [0 0.75 0] (magnet-hole (+ magnet-rad 0.1) magnet-inner-rad magnet-height))
                    )
   )
 
 (def magnet-stiffness-booster (union
-                               (magnet-hole-insert 4, 2, [0 (+ -13 wall-thickness) 0]
+                               (shape-insert 4, 2, [0 (+ -13 wall-thickness) 0]
                                                    (magnet-stiffness-booster (+ (* magnet-rad 2) 2) magnet-booster-width)
                                                    )
-                               (magnet-hole-insert 3, 3, [0 (+ 0.75 wall-thickness) 0]
+                               (shape-insert 3, 3, [0 (+ 0.75 wall-thickness) 0]
                                                    (magnet-stiffness-booster (+ (* magnet-rad 2) 2) magnet-booster-width)
                                                    )
                                )
@@ -843,17 +905,33 @@
 
 (def model-right (difference
                   (union
-                   key-holes
+                   key-holes-right
                    pinky-connectors
                    pinky-walls
                    connectors
-                   thumb
+                   thumb-right
                    thumb-connectors
                    (difference (union case-walls
                                       (if magnet-holes magnet-stiffness-booster)
                                       screw-insert-outers)
-                               usb-holder-space
-                               usb-holder-notch
+                               usb-holder-hole-space
+                               screw-insert-holes
+                               (if magnet-holes magnet-place)
+                               ))
+                  (translate [0 0 -20] (cube 350 350 40))))
+
+(def model-left-tmp (difference
+                  (union
+                   key-holes-left
+                   pinky-connectors
+                   pinky-walls
+                   connectors
+                   thumb-left
+                   thumb-connectors
+                   (difference (union case-walls
+                                      (if magnet-holes magnet-stiffness-booster)
+                                      screw-insert-outers)
+                               usb-holder-hole-space
                                screw-insert-holes
                                (if magnet-holes magnet-place)
                                ))
@@ -863,17 +941,17 @@
       (write-scad model-right))
 
 (spit "things/left.scad"
-      (write-scad (mirror [-1 0 0] model-right)))
+      (write-scad (mirror [-1 0 0] model-left-tmp)))
 
 (spit "things/right-test.scad"
       (write-scad
        (difference
         (union
-         key-holes
+         key-holes-right
          pinky-connectors
          pinky-walls
          connectors
-         thumb
+         thumb-right
          thumb-connectors
          case-walls
          thumbcaps
@@ -919,7 +997,7 @@
     key-fills
     connectors
     thumb-fill
-    thumb
+    thumb-right
     thumb-connectors
     case-walls
     )
