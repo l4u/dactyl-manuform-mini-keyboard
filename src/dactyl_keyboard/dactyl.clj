@@ -758,8 +758,19 @@
                         (if shift-down  (key-position column row (map - (wall-locate2  0 -1) [0 (/ mount-height 2) 0]))
                           (if shift-left (map + (left-key-position row 0) (wall-locate3 -1 0))
                             (key-position column row (map + (wall-locate2  1  0) [(/ mount-width 2) 0 0])))))]
-    (->> shape (translate (map + offset [(first position) (second position) (+ (/ (/ magnet-diameter 2) 2) magnet-wall-width)])))))
+    (->> shape (translate (map + offset [(first position) (second position) 0])))))
 
+(defn magnet-shape-insert [column row offset shape]
+  (let [shift-right   (= column lastcol)
+        shift-left    (= column 0)
+        shift-up      (and (not (or shift-right shift-left)) (= row 0))
+        shift-down    (and (not (or shift-right shift-left)) (>= row lastrow))
+        position      (if shift-up     (key-position column row (map + (wall-locate2  0  1) [0 (/ mount-height 2) 0]))
+                        (if shift-down  (key-position column row (map - (wall-locate2  0 -1) [0 (/ mount-height 2) 0]))
+                          (if shift-left (map + (left-key-position row 0) (wall-locate3 -1 0))
+                            (key-position column row (map + (wall-locate2  1  0) [(/ mount-width 2) 0 0])))))]
+    ;TODO: remove magnet-specific translation
+    (->> shape (translate (map + offset [(first position) (second position) (+ (/ (/ magnet-diameter 2) 2) magnet-wall-width)])))))
 
 ;;;;;;;;;;;;;;;;;;;;;
 ;; CONTOLLER HOLES ;;
@@ -791,7 +802,7 @@
 
 (def left-offset -8)
 (def usb-holder-hole-space
-  (shape-insert 1, 0, [left-offset -1 (+ -6  (/ external-controller-height 2))]
+  (shape-insert 1, 0, [left-offset -1 (/ external-controller-height 2)]
                 (usb-holder-hole external-controller-width external-controller-step external-controller-height)
                 )
   )
@@ -888,16 +899,16 @@
   )
 
 (def magnet-place (union
-                   (shape-insert 4, 2, [0 -13 0] (magnet-hole (+ (/ magnet-diameter 2) 0.1) (/ magnet-inner-diameter 2) magnet-height))
-                   (shape-insert 3, 3, [0 0.75 0] (magnet-hole (+ (/ magnet-diameter 2) 0.1) (/ magnet-inner-diameter 2) magnet-height))
+                   (magnet-shape-insert 4, 2, [0 -13 0] (magnet-hole (+ (/ magnet-diameter 2) 0.1) (/ magnet-inner-diameter 2) magnet-height))
+                   (magnet-shape-insert 3, 3, [0 0.75 0] (magnet-hole (+ (/ magnet-diameter 2) 0.1) (/ magnet-inner-diameter 2) magnet-height))
                    )
   )
 
 (def magnet-stiffness-booster (union
-                               (shape-insert 4, 2, [0 (+ -13 wall-thickness) 0]
+                               (magnet-shape-insert 4, 2, [0 (+ -13 wall-thickness) 0]
                                                    (magnet-stiffness-booster (+ magnet-diameter 2) magnet-booster-width)
                                                    )
-                               (shape-insert 3, 3, [0 (+ 0.75 wall-thickness) 0]
+                               (magnet-shape-insert 3, 3, [0 (+ 0.75 wall-thickness) 0]
                                                    (magnet-stiffness-booster (+ magnet-diameter 2) magnet-booster-width)
                                                    )
                                )
