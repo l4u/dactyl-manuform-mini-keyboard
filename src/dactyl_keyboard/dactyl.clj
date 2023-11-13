@@ -35,12 +35,12 @@
 (def external-controller-width 31.666)
 
 ; magnet holes for external wrist rest
+(def magnet-holes false)
 (def magnet-height 2)
 (def magnet-booster-width 1)
 (def magnet-diameter 10)
 (def magnet-wall-width 1)
 (def magnet-inner-diameter 3)
-(def magnet-holes false)
 
 ; If you want hot swap sockets enable this
 (def hot-swap true)
@@ -111,7 +111,7 @@
 ;;;;;;;;;;;;;;
 
 (def socket-height-adjust 1.2)
-(def hot-swap-diameter 2.89)
+(def hot-swap-diameter 3)
 (def hot-swap-vertical-offset -1)
 (def hot-swap-radius (/ hot-swap-diameter 2))
 
@@ -769,8 +769,8 @@
                         (if shift-down  (key-position column row (map - (wall-locate2  0 -1) [0 (/ mount-height 2) 0]))
                           (if shift-left (map + (left-key-position row 0) (wall-locate3 -1 0))
                             (key-position column row (map + (wall-locate2  1  0) [(/ mount-width 2) 0 0])))))]
-    ;TODO: remove magnet-specific translation
-    (->> shape (translate (map + offset [(first position) (second position) (+ (/ (/ magnet-diameter 2) 2) magnet-wall-width)])))))
+
+    (->> shape (translate (map + offset [(first position) (second position) (+ (/ magnet-diameter 2) magnet-wall-width)])))))
 
 ;;;;;;;;;;;;;;;;;;;;;
 ;; CONTOLLER HOLES ;;
