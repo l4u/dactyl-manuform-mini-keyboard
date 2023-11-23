@@ -35,15 +35,17 @@
 (def external-controller-width 31.666)
 
 ; magnet holes for external wrist rest
-(def magnet-holes false)
+(def magnet-holes true)
 (def magnet-height 2)
 (def magnet-booster-width 1)
 (def magnet-diameter 10)
 (def magnet-wall-width 1)
+(def magnet-connector-wall-width 1.5)
+(def magnet-connector-length 4)
 (def magnet-inner-diameter 3)
 
 ; If you want hot swap sockets enable this
-(def hot-swap true)
+(def hot-swap false)
 (def plate-height 3)
 (defn column-offset [column] (cond
                                (= column 2) [0 2.82 -4.5]
@@ -879,9 +881,9 @@
    (key-wall-brace lastcol cornerrow 0 -1 web-post-br lastcol cornerrow 0 -1 wide-post-br)
    (key-wall-brace lastcol 0 0 1 web-post-tr lastcol 0 0 1 wide-post-tr)))
 
-;;;;;;;;;;;;;;;;;
-;; Magnet hole ;;
-;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; wrist rest magnetic holder mounting ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defn magnet-hole  [radius inner-radius height]
   (rotate [0 (deg2rad 90) (deg2rad 90)]
           (union
@@ -897,7 +899,7 @@
           (cube side side height)
           )
   )
-
+; keyboard's magnet hole
 (def magnet-place (union
                    (magnet-shape-insert 4, 2, [0 -13 0] (magnet-hole (+ (/ magnet-diameter 2) 0.1) (/ magnet-inner-diameter 2) magnet-height))
                    (magnet-shape-insert 3, 3, [0 0.75 0] (magnet-hole (+ (/ magnet-diameter 2) 0.1) (/ magnet-inner-diameter 2) magnet-height))
@@ -912,6 +914,26 @@
                                                    (magnet-stiffness-booster (+ magnet-diameter 2) magnet-booster-width)
                                                    )
                                )
+  )
+
+; wrist rest magnet holder
+(def magnet-connector
+  (difference
+   (rotate [0 (deg2rad 90) (deg2rad 90)]
+           (translate [0 0 (/ magnet-connector-length -2)]
+     (binding [*fn* 100] (cylinder (+ (/ magnet-diameter 2) magnet-connector-wall-width) magnet-connector-length))
+           )
+           )
+     (magnet-hole (+ (/ magnet-diameter 2) 0.1) (/ magnet-inner-diameter 2) magnet-height)
+   )
+)
+
+(def magnet-connector-offset 1)
+(def magnet-connectors
+  (union
+   (magnet-shape-insert 4, 2, [0 (- -13 (+ magnet-connector-offset (/ magnet-height 2))) 0] magnet-connector)
+   (magnet-shape-insert 3, 3, [0 (- 0.75 (+ magnet-connector-offset (/ magnet-height 2))) 0] magnet-connector)
+   )
   )
 
 (def model-right (difference
@@ -964,12 +986,37 @@
          connectors
          thumb-right
          thumb-connectors
+         (if magnet-holes magnet-connectors)
          case-walls
          thumbcaps
          caps)
 
         (translate [0 0 -20] (cube 350 350 40)))))
 
+(if magnet-holes
+  (spit "things/right-wrist-connector.scad"
+      (write-scad
+       (difference
+        (union
+         magnet-connectors
+        )
+        )
+       )
+        )
+
+  (spit "things/left-wrist-connector.scad"
+        (write-scad
+         (mirror [-1 0 0]
+                 (difference
+          (union
+           magnet-connectors
+           )
+                  )
+                 )
+         )
+        )
+
+)
 ;;;;;;;;;;;;;;;;;;;;;
 ;; plate generation;;
 ;;;;;;;;;;;;;;;;;;;;;
