@@ -30,7 +30,7 @@
 
 ;external case for controller and ports
 (def external-controller true)
-(def external-controller-height 13.5)
+(def external-controller-height 9)
 (def external-controller-step 1.5)
 (def external-controller-width 31.666)
 
@@ -46,7 +46,8 @@
 
 ; If you want hot swap sockets enable this
 (def hot-swap false)
-(def plate-height 3)
+(def plate-height 2)
+(def plate-border-height 0)
 (defn column-offset [column] (cond
                                (= column 2) [0 2.82 -4.5]
                                (>= column 4) [0 -12 5.64]            ; original [0 -5.8 5.64]
@@ -1061,6 +1062,9 @@
     )
    )
   )
+(def case-walls-outline
+  (project case-walls)
+  )
 
 (def wall-shape
   (cut
@@ -1073,9 +1077,17 @@
 
 (def bottom-height-half (/ plate-height 2))
 (def bottom-plate
-  (translate [0 0 bottom-height-half] (extrude-linear {:height 3 :twist 0 :convexity 0}
-                                                      model-outline
-                                                      )))
+  (union
+    (translate [0 0 bottom-height-half]
+               (extrude-linear {:height plate-height :twist 0 :convexity 0} model-outline)
+               )
+   ( if (> plate-border-height 0)
+     (translate [0 0 (+ plate-height (/ plate-border-height 2))]
+                (extrude-linear {:height plate-border-height :twist 0 :convexity 0} case-walls-outline)
+                )
+       )
+   )
+  )
 (def plate-right (difference
                   bottom-plate
                   screw-insert-screw-holes

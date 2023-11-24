@@ -1,7 +1,9 @@
 // microcontroller dimension
 controllerWidth = 23;
-controllerLen = 53.5;
+controllerLen = 54.3;
 controllerHeight = 1;
+
+isExternalResetButtonEnabled = false;
 
 buttonAdditionalHeight = 4.5;
 controllerBoxHeight = 9;
@@ -9,12 +11,12 @@ controllerWallWidth = 1;
 controllerBottomHeight = 1;
 
 //usb hole
-usbHoleTopOffset = 2.2;
-usbHoleHeight = 3.7;
+usbHoleTopOffset = 1;
+usbHoleHeight = 6.5;
 usbHoleWidth = usbHoleHeight + 5.6;
 
 // trrs
-trrsDiameter = 6; // real size 5.8
+trrsDiameter = 6.2; // real size 5.8
 trrsLen1 = 4;
 trrsLen2 = 11.8;
 trrsContactsLen = 6.5;
@@ -36,7 +38,10 @@ buttonHeight = 5.2;
 buttonWidth = 6;
 buttonDepth = 1.5;
  
-boxHeight = controllerBoxHeight + buttonAdditionalHeight;
+boxHeight = controllerBoxHeight; 
+if (isExternalResetButtonEnabled) {
+    boxHeight = boxHeight + buttonAdditionalHeight;
+}
 
 module trrs() {
     color("green")
@@ -72,10 +77,12 @@ module controllerBox() {
             translate([leftOffset, -bracingWidth *3 - controllerWallWidth, controllerBoxHeight])
             cube([bracingOuterSize, controllerWallWidth, (boxHeight- controllerBoxHeight)]);
             
-            //button holder
-            holderWidth = buttonWidth + 1;
-            translate([leftOffset + bracingOuterSize - bracingWidth * 2 - holderWidth, - bracingWidth * 3 + buttonDepth , controllerBoxHeight])
-            cube([holderWidth, buttonDepth, buttonAdditionalHeight]);
+            if (isExternalResetButtonEnabled) {
+                //button holder
+                holderWidth = buttonWidth + 1;
+                translate([leftOffset + bracingOuterSize - bracingWidth * 2 - holderWidth, - bracingWidth * 3 + buttonDepth , controllerBoxHeight])
+                cube([holderWidth, buttonDepth, buttonAdditionalHeight]);
+            }
             
              //left
             translate([-trrsOutterDiameter - controllerWallWidth - bracingWidth *2, -controllerWallWidth -3*bracingWidth, 0]) {
@@ -99,20 +106,21 @@ module controllerBox() {
         // Left wiring hole
         translate([controllerWidth - controllerWiringHoleWidth, 0, -0.5 ]) cube([controllerWiringHoleWidth, controllerLen, controllerBottomHeight + 0.5]);
         
+        usbHoleOffset = 2;
         //usb hole
-        translate([controllerWidth/2 - usbHoleHeight/2 - controllerWallWidth, -controllerWallWidth - 3*bracingWidth, usbHoleTopOffset + usbHoleHeight/2])
+        translate([controllerWidth/2 - usbHoleHeight/2 - controllerWallWidth + usbHoleOffset, -controllerWallWidth - 3*bracingWidth, usbHoleTopOffset + usbHoleHeight/2])
         rotate([-90,0,00]) {
             cylinder(10, usbHoleHeight/2, usbHoleHeight/2, $fn=50);
             translate([5.6,0,0]) cylinder(10, usbHoleHeight/2, usbHoleHeight/2, $fn=50);
             translate([0, -usbHoleHeight/2 ,0]) cube([5.6, usbHoleHeight, 10]);
         } 
-        
+        /*
         //usb hole entry
         outerHoleWidth = 14;
-        translate([controllerWidth/2 - usbHoleHeight/2 - controllerWallWidth, -controllerWallWidth - 3*bracingWidth, usbHoleTopOffset + usbHoleHeight/2])
+        translate([controllerWidth/2 - usbHoleHeight/2 - controllerWallWidth + usbHoleOffset, -controllerWallWidth - 3*bracingWidth, usbHoleTopOffset + usbHoleHeight/2])
          rotate([-90, 0, 0]) {
              hull(){
-                 union(){
+                 union() {
                     cylinder(3*bracingWidth - controllerWallWidth, usbHoleHeight/2, usbHoleHeight/2, $fn=50);
                     translate([5.6,0,0]) cylinder( 3*bracingWidth - controllerWallWidth, usbHoleHeight/2, usbHoleHeight/2, $fn=50);
                     translate([0, -usbHoleHeight/2 ,0]) cube([5.6, usbHoleHeight, 3*bracingWidth - controllerWallWidth]);
@@ -120,19 +128,21 @@ module controllerBox() {
                  translate([-usbHoleHeight/2 -(outerHoleWidth - usbHoleWidth)/2,- outerHoleWidth/4,0]) cube([outerHoleWidth, outerHoleWidth/2, 1]);
              }
          }
-       
+       */
         //usb offset
         translate([controllerWidth/2 - usbHoleHeight - controllerWallWidth, -bracingWidth, controllerWallWidth])
         cube([5.6 + usbHoleHeight, bracingWidth, controllerBoxHeight]);
         
-        buttonBottomOffset = 0.5;
-        //switcher button hole
-        leftOffset = -trrsOutterDiameter - controllerWallWidth - bracingWidth *2;
-        translate([leftOffset + bracingOuterSize -  bracingWidth * 3 - (buttonWidth - buttonDiameter)/2,  -  bracingWidth * 3 - controllerWallWidth,  buttonDiameter/2 + controllerBoxHeight + buttonBottomOffset])
-        rotate([-90, 0, 0]) {
-            cylinder(controllerWallWidth/2, buttonClickDiameter/2, buttonClickDiameter/2, $fn = 50);
-            translate([0, 0, controllerWallWidth/2]) cylinder(controllerWallWidth/2, buttonDiameter/2, buttonDiameter/2, $fn = 50);
-        }
+        if (isExternalResetButtonEnabled) {
+            buttonBottomOffset = 0.5;
+            //switcher button hole
+            leftOffset = -trrsOutterDiameter - controllerWallWidth - bracingWidth *2;
+            translate([leftOffset + bracingOuterSize -  bracingWidth * 3 - (buttonWidth - buttonDiameter)/2,  -  bracingWidth * 3 - controllerWallWidth,  buttonDiameter/2 + controllerBoxHeight + buttonBottomOffset])
+            rotate([-90, 0, 0]) {
+                cylinder(controllerWallWidth/2, buttonClickDiameter/2, buttonClickDiameter/2, $fn = 50);
+                translate([0, 0, controllerWallWidth/2]) cylinder(controllerWallWidth/2, buttonDiameter/2, buttonDiameter/2, $fn = 50);
+            }
+    }
         
         //switcher case hole
         translate([leftOffset + bracingOuterSize -  bracingWidth * 3 - buttonWidth/2 - controllerWallWidth, -  bracingWidth * 3, controllerBoxHeight - controllerWallWidth + buttonBottomOffset])
