@@ -35,7 +35,7 @@
 (def external-controller-width 31.666)
 
 ; magnet holes for external wrist rest
-(def magnet-holes true)
+(def magnet-holes false)
 (def magnet-height 2)
 (def magnet-booster-width 1)
 (def magnet-diameter 10)
@@ -46,6 +46,7 @@
 
 ; If you want hot swap sockets enable this
 (def hot-swap false)
+(def low-profile true)
 (def plate-height 2)
 (def plate-border-height 0)
 (defn column-offset [column] (cond
@@ -102,7 +103,11 @@
 
 (def sa-profile-key-height 12.7)
 
-(def plate-thickness 4) ; толщина верхних стенок
+(def plate-thickness
+  (if low-profile
+    2
+    4
+    )) ; толщина верхних стенок
 (def side-nub-thickness 4)
 (def retention-tab-thickness 1.5)
 (def retention-tab-hole-thickness (- plate-thickness retention-tab-thickness))
@@ -114,11 +119,63 @@
 ;;;;;;;;;;;;;;
 
 (def socket-height-adjust 1.2)
-(def hot-swap-diameter 3)
+(def hot-swap-diameter 3.1)
 (def hot-swap-vertical-offset -1)
 (def hot-swap-radius (/ hot-swap-diameter 2))
 
-(def hot-socket
+(def hot-swap-hole-position-x 2.475)
+(def hot-swap-hole-position-y 0.325)
+(def hot-swap-hole-offset-y 2.20)
+(def hot-swap-hole-offset-x 5)
+
+(def hot-socket-low-profile
+
+  (difference
+   ; hot-swap plate
+   (difference
+    (translate [0 0 (- hot-swap-vertical-offset (/ socket-height-adjust 2)) ]
+               (cube (+ keyswitch-height 3.6) (+ keyswitch-width 3) (+ plate-thickness socket-height-adjust))
+               )
+    (translate [0 0 (- (/ socket-height-adjust -2) -0.5)]
+               (cube keyswitch-height keyswitch-width (+ socket-height-adjust plate-thickness))
+               )
+    )
+
+   ; corner hot-fix for tightly
+   (rotate [0 (deg2rad 25) (deg2rad 40)]
+           (translate [16.5 3 5]
+                      (cube 10 10 10)
+                      )
+           )
+
+   ; hot-swap socket hole
+   (scale [1 1 1]
+          (translate [0.075 4.815 (- -2.75 socket-height-adjust)]
+
+                     )
+          ; keyboard center hole
+          (binding [*fn* 100] (cylinder 2.5 20))
+
+          ; socket connector 1 hole
+          (translate [4.4 4.7 0]
+                     (binding [*fn* 200] (cylinder hot-swap-radius 20))
+                     )
+
+          ; socket connector 2 hole
+          (translate [-2.6 5.75 0] ; -3.875 -2.215
+                     (binding [*fn* 200] (cylinder hot-swap-radius 20))
+                     )
+          )
+   ;half hole
+   (translate [0 (/ (+ keyswitch-width 3) -4) (- -2.05 socket-height-adjust) ]
+              (cube (+ keyswitch-height 3.6) (/ (+ keyswitch-width 3) 2) 3.1)
+              )
+   ;(binding [*fn* 50] (cylinder 2 2))
+   )
+
+  )
+
+(def hot-socket-standart
   (difference
    ; hot-swap plate
    (difference
@@ -190,6 +247,13 @@
               )
    ;(binding [*fn* 50] (cylinder 2 2))
    )
+  )
+
+(def hot-socket
+  (if low-profile
+    hot-socket-low-profile
+    hot-socket-standart
+    )
   )
 
 (def single-plate-right
@@ -781,6 +845,10 @@
 ; Offsets for the controller/trrs holder cutout
 (def holder-offset
   (case nrows
+    0 0
+    1 0
+    2 0
+    3 0
     4 -2.5
     5 0
     6 (if inner-column
@@ -791,6 +859,10 @@
 
 (def notch-offset
   (case nrows
+    0 0
+    1 0
+    2 0
+    3 0
     4 3.35
     5 0.15
     6 -5.07))
