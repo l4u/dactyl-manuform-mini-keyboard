@@ -35,7 +35,7 @@
 (def external-controller-width 31.666)
 
 ; magnet holes for external wrist rest
-(def magnet-holes false)
+(def magnet-holes true)
 (def magnet-height 2)
 (def magnet-booster-width 1)
 (def magnet-diameter 10)
@@ -48,16 +48,18 @@
 (def hot-swap false)
 (def low-profile true)
 (def plate-height 2)
-(def plate-border-height 0)
+(def plate-border-height 1)
 (defn column-offset [column] (cond
                                (= column 2) [0 2.82 -4.5]
-                               (>= column 4) [0 -12 5.64]            ; original [0 -5.8 5.64]
-                               (< column 2) [0 -5.8 3]
-                               :else [0 0 0])) ; безымянный
+                               (>= column 4) [0 -16 5.64]   ; pinky finger
+                               (< column 2) [0 -5.8 3]      ; index finger
+                               :else [0 0 0]))              ; ring finger
 
 (def thumb-offsets [6 -3 7])
 
-(def keyboard-z-offset 9)               ; controls overall height; original=9 with centercol=3; use 16 for centercol=2
+(def keyboard-z-offset
+  (if hot-swap 12 9)
+  )               ; controls overall height; original=9 with centercol=3; use 16 for centercol=2
 
 (def extra-width 2.5)                   ; extra space between the base of keys; original= 2
 (def extra-height 1.0)                  ; original= 0.5
@@ -66,12 +68,6 @@
 (def wall-xy-offset 5)                  ; offset in the x and/or y direction for the first downward-sloping part of the wall (negative)
 (def wall-thickness 2)                  ; wall thickness parameter; originally 5
 
-;; controller hole
-(def controller_hole_height 13)
-(def controller_hole_width 30)
-(def controller_hole_wall_width 1.5)
-(def controller_hole_groove_width 27)
-(def controller_hole_groove_wall_width 1.5)
 ;; Settings for column-style == :fixed
 ;; The defaults roughly match Maltron settings
 ;;   http://patentimages.storage.googleapis.com/EP0219944A2/imgf0002.png
@@ -85,6 +81,9 @@
 ; If you use Cherry MX or Gateron switches, this can be turned on.
 ; If you use other switches such as Kailh, you should set this as false
 (def create-side-nubs? false)
+
+; Holes inside keyswitch
+(def use-top-nub false)
 
 ;;;;;;;;;;;;;;;;;;;;;;;
 ;; General variables ;;
@@ -105,9 +104,10 @@
 
 (def plate-thickness
   (if low-profile
-    2
+    2.5
     4
     )) ; толщина верхних стенок
+
 (def side-nub-thickness 4)
 (def retention-tab-thickness 1.5)
 (def retention-tab-hole-thickness (- plate-thickness retention-tab-thickness))
@@ -128,8 +128,13 @@
 (def hot-swap-hole-offset-y 2.20)
 (def hot-swap-hole-offset-x 5)
 
-(def hot-socket-low-profile
+;; low profile
+(def hot-swap-low-profile-height 1.85)
+(def hot-swap-low-profile-half-width 4.65)
+(def hot-swap-low-profile-length 9.55)
+(def hot-swap-low-profile-half-length 4.75)
 
+(def hot-socket-low-profile
   (difference
    ; hot-swap plate
    (difference
@@ -150,9 +155,6 @@
 
    ; hot-swap socket hole
    (scale [1 1 1]
-          (translate [0.075 4.815 (- -2.75 socket-height-adjust)]
-
-                     )
           ; keyboard center hole
           (binding [*fn* 100] (cylinder 2.5 20))
 
@@ -198,30 +200,6 @@
    (scale [1 1 1]
           (translate [0.075 4.815 (- -2.75 socket-height-adjust)]
                      (union
-                      ; cube1
-                      (cube 119.6 114.1 2)
-
-                      ; circle1
-                      (translate [-4.8 0.55 0]
-                                 (binding [*fn* 100] (cylinder 1.5 2))
-                                 )
-
-                      (translate [-3.35 -1.75 0]
-                                 (difference
-                                  ;cube2
-                                  (cube 5.9 4.6 2)
-                                  ;circle2
-                                  (translate [2.95 -2.55 0]
-                                             (binding [*fn* 100] (cylinder 2.25 2))
-                                             )
-                                  )
-                                 )
-                      (translate [6 0.325 0]
-                                 (cube 6 1.8 2)
-                                 )
-                      (translate [-6 -2.215 0]
-                                 (cube 6 1.8 2)
-                                 )
                       (translate [2.475 0.325 0]
                                  (binding [*fn* 200] (cylinder hot-swap-radius 20))
                                  )
@@ -230,16 +208,8 @@
                                  )
                       )
                      )
+          ; keyboard center hole
           (binding [*fn* 100] (cylinder 2.3 20))
-          (translate [-5.08 0 0]
-                     (binding [*fn* 100] (cylinder 1.1 20))
-                     (translate [2 -0.4 0]
-                                (cube 4 4 10)
-                                )
-                     )
-          (translate [5.08 0 0]
-                     (binding [*fn* 100] (cylinder 1.1 20))
-                     )
           )
    ;half hole
    (translate [0 (/ (+ keyswitch-width 3) -4) (- -2.05 socket-height-adjust) ]
@@ -254,6 +224,10 @@
     hot-socket-low-profile
     hot-socket-standart
     )
+  )
+
+(def nub-size
+  (if use-top-nub 5 0)
   )
 
 (def single-plate-right
@@ -274,7 +248,7 @@
                                              (/ side-nub-thickness 2)])))
                       (translate [0 0 (- plate-thickness side-nub-thickness)]))
         plate-half (union top-wall left-wall (if create-side-nubs? (with-fn 100 side-nub)))
-        top-nub (->> (cube 5 5 retention-tab-hole-thickness)
+        top-nub (->> (cube nub-size nub-size  retention-tab-hole-thickness)
                      (translate [(+ (/ keyswitch-width 2)) 0 (/ retention-tab-hole-thickness 2)]))
         top-nub-pair (union top-nub
                             (->> top-nub
@@ -309,7 +283,7 @@
                                              (/ side-nub-thickness 2)])))
                       (translate [0 0 (- plate-thickness side-nub-thickness)]))
         plate-half (union top-wall left-wall (if create-side-nubs? (with-fn 100 side-nub)))
-        top-nub (->> (cube 5 5 retention-tab-hole-thickness)
+        top-nub (->> (cube nub-size nub-size retention-tab-hole-thickness)
                      (translate [(+ (/ keyswitch-width 2)) 0 (/ retention-tab-hole-thickness 2)]))
         top-nub-pair (union top-nub
                             (->> top-nub
@@ -877,7 +851,7 @@
 
 (def left-offset -8)
 (def usb-holder-hole-space
-  (shape-insert 1, 0, [left-offset -1 (/ external-controller-height 2)]
+  (shape-insert 1, 0, [left-offset -0.5 (/ external-controller-height 2)]
                 (usb-holder-hole external-controller-width external-controller-step external-controller-height)
                 )
   )
@@ -974,16 +948,16 @@
   )
 ; keyboard's magnet hole
 (def magnet-place (union
-                   (magnet-shape-insert 4, 2, [0 -13 0] (magnet-hole (+ (/ magnet-diameter 2) 0.1) (/ magnet-inner-diameter 2) magnet-height))
-                   (magnet-shape-insert 3, 3, [0 0.75 0] (magnet-hole (+ (/ magnet-diameter 2) 0.1) (/ magnet-inner-diameter 2) magnet-height))
+                   (magnet-shape-insert 4, 2, [0 -13.5 0] (magnet-hole (+ (/ magnet-diameter 2) 0.1) (/ magnet-inner-diameter 2) magnet-height))
+                   (magnet-shape-insert 3, 3, [0 -0.35 0] (magnet-hole (+ (/ magnet-diameter 2) 0.1) (/ magnet-inner-diameter 2) magnet-height))
                    )
   )
 
 (def magnet-stiffness-booster (union
-                               (magnet-shape-insert 4, 2, [0 (+ -13 wall-thickness) 0]
+                               (magnet-shape-insert 4, 2, [0 (+ -13.5 wall-thickness) 0]
                                                    (magnet-stiffness-booster (+ magnet-diameter 2) magnet-booster-width)
                                                    )
-                               (magnet-shape-insert 3, 3, [0 (+ 0.75 wall-thickness) 0]
+                               (magnet-shape-insert 3, 3, [0 (+ -0.35 wall-thickness) 0]
                                                    (magnet-stiffness-booster (+ magnet-diameter 2) magnet-booster-width)
                                                    )
                                )
@@ -1167,5 +1141,8 @@
 
 (spit "things/right-plate-print.scad" (write-scad plate-right))
 (spit "things/left-plate-print.scad" (write-scad (mirror [-1 0 0] plate-right)))
+
+(spit "things/hotswap-low-debug.scad" (write-scad hot-socket-low-profile))
+(spit "things/hotswap-standart.scad" (write-scad hot-socket-standart))
 
 (defn -main [dum] 1)  ; dummy to make it easier to batch
