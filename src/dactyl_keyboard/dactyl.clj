@@ -30,7 +30,7 @@
 
 ;external case for controller and ports
 (def external-controller true)
-(def external-controller-height 9)
+(def external-controller-height 10)
 (def external-controller-step 1.5)
 (def external-controller-width 31.666)
 
