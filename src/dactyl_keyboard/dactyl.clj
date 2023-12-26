@@ -533,7 +533,7 @@
   (->> shape
        (rotate (deg2rad  13) [1 0 0])
        (rotate (deg2rad -20) [0 1 0])
-       (rotate (deg2rad  20) [0 0 1])
+       (rotate (deg2rad  15) [0 0 1])
        (translate thumborigin)
        (translate [-6 -28 1])))
 
@@ -650,6 +650,11 @@
     (thumb-tl-place web-post-bl)
     (thumb-tl-place web-post-br)
     (thumb-mr-place web-post-tr))
+   (triangle-hulls    ; top two to the middle two, starting on the left
+    (key-place 2 lastrow web-post-bl)
+    (thumb-6-place thumb-post-tr)
+    (key-place 2 lastrow web-post-br)
+     )
    (triangle-hulls    ; top two to the main keyboard, starting on the left
     (thumb-tl-place web-post-tl)
     (key-place 0 cornerrow web-post-bl)
@@ -664,6 +669,8 @@
     (thumb-tr-place thumb-post-tr)
     (key-place 2 lastrow web-post-bl)
     (thumb-tr-place thumb-post-br)
+    (thumb-6-place thumb-post-tr)
+
     (key-place 2 lastrow web-post-br)
     (key-place 3 lastrow web-post-bl)
     (key-place 2 lastrow web-post-tr)
@@ -767,7 +774,7 @@
    (for [x (range 5 ncols)] (key-wall-brace x cornerrow 0 -1 web-post-bl (dec x) cornerrow 0 -1 web-post-br))
    ; thumb walls
    (wall-brace thumb-6-place  0 -1 web-post-br thumb-6-place  0 -1 thumb-post-tr)
-   (wall-brace thumb-6-place  0 -1 web-post-br thumb-mr-place  0 -1 web-post-br)
+   (wall-brace thumb-6-place  0 -1 web-post-br thumb-6-place  0 -1 web-post-bl)
    (wall-brace thumb-mr-place  0 -1 web-post-br thumb-mr-place  0 -1 web-post-bl) ; ?
    (wall-brace thumb-br-place  0 -1 web-post-br thumb-br-place  0 -1 web-post-bl)
    (wall-brace thumb-bl-place  0  1 web-post-tr thumb-bl-place  0  1 web-post-tl)
