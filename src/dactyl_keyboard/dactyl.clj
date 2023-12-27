@@ -19,7 +19,7 @@
 (def row-curvature (deg2rad 6))                             ; 5                   ; curvature of the rows
 
 (def centerrow (- nrows 3))             ; controls front-back tilt
-(def centercol 2)                       ; controls left-right tilt / tenting (higher number is more tenting)
+(def centercol 3)                       ; controls left-right tilt / tenting (higher number is more tenting)
 (def tenting-angle (deg2rad 15))            ; or, change this for more precise tenting control
 (def column-style
   (if (> nrows 5) :orthographic :standard))  ; options include :standard, :orthographic, and :fixed
@@ -909,11 +909,11 @@
 (defn screw-insert-all-shapes [bottom-radius top-radius height]
   (union
    (screw-insert 0 0         bottom-radius top-radius height [6 7 0])
-   (screw-insert 0 lastrow   bottom-radius top-radius height [-2 1 0])
+   (screw-insert 0 lastrow   bottom-radius top-radius height [-4 1 0])
    (screw-insert lastcol lastrow  bottom-radius top-radius height [-4 15 0])
    (screw-insert lastcol 0         bottom-radius top-radius height [-4 7 0])
 
-   (screw-insert 0 lastrow         bottom-radius top-radius height [15 -43 0])
+   (screw-insert 0 lastrow         bottom-radius top-radius height [10 -44 0])
    (screw-insert 2 lastrow         bottom-radius top-radius height [-4 -4 0])
 
    (screw-insert 3 0         bottom-radius top-radius height [-10 -3 0])
