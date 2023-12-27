@@ -916,7 +916,7 @@
    (screw-insert 0 lastrow         bottom-radius top-radius height [10 -44 0])
    (screw-insert 2 lastrow         bottom-radius top-radius height [-4 -4 0])
 
-   (screw-insert 3 0         bottom-radius top-radius height [-10 -3 0])
+   (screw-insert 3 0         bottom-radius top-radius height [-10 -2 0])
    )
   )
 
