@@ -51,7 +51,7 @@
 (def plate-border-height 1)
 (defn column-offset [column] (cond
                                (= column 2) [0 2.82 -4.5]
-                               (>= column 4) [0 -16 5.64]   ; pinky finger
+                               (>= column 4) [0 -19 5.64]   ; pinky finger
                                (< column 2) [0 -5.8 3]      ; index finger
                                :else [0 0 0]))              ; ring finger
 
@@ -518,7 +518,7 @@
   (->> shape
        (rotate (deg2rad  14) [1 0 0])
        (rotate (deg2rad -15) [0 1 0])
-       (rotate (deg2rad  10) [0 0 1]) ; original 10
+       (rotate (deg2rad  15) [0 0 1]) ; original 10
        (translate thumborigin)
        (translate [-15 -10 5]))) ; original 1.5u  (translate [-12 -16 3])
 (defn thumb-tl-place [shape]
@@ -532,7 +532,7 @@
 (defn thumb-6-place [shape]
   (->> shape
        (rotate (deg2rad  13) [1 0 0])
-       (rotate (deg2rad -20) [0 1 0])
+       (rotate (deg2rad -15) [0 1 0])
        (rotate (deg2rad  15) [0 0 1])
        (translate thumborigin)
        (translate [-6 -28 1])))
@@ -543,7 +543,7 @@
        (rotate (deg2rad -23) [0 1 0])
        (rotate (deg2rad  25) [0 0 1])
        (translate thumborigin)
-       (translate [-23 -34 -6])))
+       (translate [-24 -35 -6])))
 (defn thumb-br-place [shape]
   (->> shape
        (rotate (deg2rad   6) [1 0 0])
