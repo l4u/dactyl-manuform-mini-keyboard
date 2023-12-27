@@ -104,7 +104,7 @@
 
 (def plate-thickness
   (if low-profile
-    2.5
+    3
     4
     )) ; толщина верхних стенок
 
@@ -620,12 +620,6 @@
     (thumb-mr-place web-post-br)
     (thumb-6-place web-post-tl)
     (thumb-6-place web-post-bl))
-;   (triangle-hulls
-;    (thumb-tr-place web-post-br)
-;    (thumb-tr-place web-post-bl)
-;    (thumb-6-place web-post-tl)
-;    (thumb-6-place web-post-tr)
-;    )
    (triangle-hulls    ; between top row and bottom row
     (thumb-br-place web-post-tl)
     (thumb-bl-place web-post-bl)
@@ -918,7 +912,10 @@
    (screw-insert 0 lastrow   bottom-radius top-radius height [-2 1 0])
    (screw-insert lastcol lastrow  bottom-radius top-radius height [-4 15 0])
    (screw-insert lastcol 0         bottom-radius top-radius height [-4 7 0])
-   (screw-insert 1 lastrow         bottom-radius top-radius height [-2 -17 0])
+
+   (screw-insert 0 lastrow         bottom-radius top-radius height [15 -43 0])
+   (screw-insert 2 lastrow         bottom-radius top-radius height [-4 -4 0])
+
    (screw-insert 3 0         bottom-radius top-radius height [-10 -3 0])
    )
   )
