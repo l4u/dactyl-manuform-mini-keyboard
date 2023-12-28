@@ -747,7 +747,7 @@
    ; back wall
    (for [x (range 0 ncols)] (key-wall-brace x 0 0 1 web-post-tl x       0 0 1 web-post-tr))
    (for [x (range 1 ncols)] (key-wall-brace x 0 0 1 web-post-tl (dec x) 0 0 1 web-post-tr))
-
+   (key-wall-brace 2 0 0.1 1 web-post-tl (dec 2) 0 -0.1 1 web-post-tr)
    ; left wall
    (for [y (range 0 lastrow)] (union (wall-brace (partial left-key-place y 1)       -1 0 web-post (partial left-key-place y -1) -1 0 web-post)
                                      (hull (key-place 0 y web-post-tl)
@@ -767,7 +767,7 @@
    (for [x (range 4 ncols)] (key-wall-brace x cornerrow 0 -1 web-post-bl x       cornerrow 0 -1 web-post-br)) ; TODO fix extra wall
    (for [x (range 5 ncols)] (key-wall-brace x cornerrow 0 -1 web-post-bl (dec x) cornerrow 0 -1 web-post-br))
    ; thumb walls
-   (wall-brace thumb-6-place  0 -1 web-post-br thumb-6-place  0 -1 thumb-post-tr)
+   (wall-brace thumb-6-place  0 -1 web-post-br thumb-6-place  1 -1 thumb-post-tr)
    (wall-brace thumb-6-place  0 -1 web-post-br thumb-6-place  0 -1 web-post-bl)
    (wall-brace thumb-mr-place  0 -1 web-post-br thumb-mr-place  0 -1 web-post-bl) ; ?
    (wall-brace thumb-br-place  0 -1 web-post-br thumb-br-place  0 -1 web-post-bl)
@@ -781,7 +781,7 @@
    (wall-brace thumb-mr-place  0 -1 web-post-bl thumb-br-place  0 -1 web-post-br)
    (wall-brace thumb-6-place  0 -1 web-post-bl thumb-mr-place  0 -1 web-post-br)
    (wall-brace thumb-bl-place -1  0 web-post-bl thumb-br-place -1  0 web-post-tl)
-   (wall-brace thumb-6-place  0 -1 thumb-post-tr (partial key-place 3 lastrow)  0 -1 web-post-bl)
+   (wall-brace thumb-6-place  1 -1 thumb-post-tr (partial key-place 3 lastrow)  0 -1 web-post-bl)
    ; clunky bit on the top left thumb connection  (normal connectors don't work well)
    (bottom-hull
     (left-key-place cornerrow -1 (translate (wall-locate2 -1 0) web-post))
@@ -914,7 +914,7 @@
    (screw-insert lastcol 0         bottom-radius top-radius height [-4 7 0])
 
    (screw-insert 0 lastrow         bottom-radius top-radius height [10 -44 0])
-   (screw-insert 2 lastrow         bottom-radius top-radius height [-4 -4 0])
+   (screw-insert 2 lastrow         bottom-radius top-radius height [-3 -5 0])
 
    (screw-insert 3 0         bottom-radius top-radius height [-10 -2 0])
    )
