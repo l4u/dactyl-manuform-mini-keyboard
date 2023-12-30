@@ -45,8 +45,8 @@
 (def magnet-inner-diameter 3)
 
 ; If you want hot swap sockets enable this
-(def hot-swap false)
-(def low-profile true)
+(def hot-swap true)
+(def low-profile false)
 (def plate-height 2)
 (def plate-border-height 1)
 (defn column-offset [column] (cond
@@ -119,7 +119,9 @@
 ;;;;;;;;;;;;;;
 
 (def socket-height-adjust 1.2)
-(def hot-swap-diameter 3.1)
+(def socket-thickness 2)
+(def socket-wall-height 2.9)
+(def hot-swap-diameter 3.3)
 (def hot-swap-vertical-offset -1)
 (def hot-swap-radius (/ hot-swap-diameter 2))
 
@@ -145,13 +147,6 @@
                (cube keyswitch-height keyswitch-width (+ socket-height-adjust plate-thickness))
                )
     )
-
-   ; corner hot-fix for tightly
-   (rotate [0 (deg2rad 25) (deg2rad 40)]
-           (translate [16.5 3 5]
-                      (cube 10 10 10)
-                      )
-           )
 
    ; hot-swap socket hole
    (scale [1 1 1]
@@ -179,45 +174,77 @@
 
 (def hot-socket-standart
   (difference
-   ; hot-swap plate
-   (difference
-    (translate [0 0 (- hot-swap-vertical-offset (/ socket-height-adjust 2))]
-               (cube (+ keyswitch-height 3.6) (+ keyswitch-width 3) (+ plate-thickness socket-height-adjust))
-               )
-    (translate [0 0 (- (/ socket-height-adjust -2) -0.5)]
-               (cube keyswitch-height keyswitch-width (+ socket-height-adjust 2.2))
-               )
+   (union
+    ; hot-swap plate
+    (difference
+      (translate [0 0 (- hot-swap-vertical-offset (/ socket-height-adjust 2))]
+        (cube (+ keyswitch-height 3.6) (+ keyswitch-width 3) (+ socket-thickness socket-height-adjust))
+      )
+      (translate [0 0 (- (/ socket-height-adjust -2) -0.5)]
+        (cube keyswitch-height keyswitch-width (+ socket-height-adjust 2.2))
+      )
     )
 
-   ; corner hot-fix for tightly
-   (rotate [0 (deg2rad 25) (deg2rad 40)]
-           (translate [16.5 3 5]
-                      (cube 10 10 10)
-                      )
-           )
+      (translate [0, 0, -4.1]
+        (difference
+          (translate [0, 2.8, 0] (cube 17.8, 11.5, socket-wall-height))
 
-   ; hot-swap socket hole
-   (scale [1 1 1]
-          (translate [0.075 4.815 (- -2.75 socket-height-adjust)]
-                     (union
-                      (translate [2.475 0.325 0]
-                                 (binding [*fn* 200] (cylinder hot-swap-radius 20))
-                                 )
-                      (translate [-3.875 -2.215 0]
-                                 (binding [*fn* 200] (cylinder hot-swap-radius 20))
-                                 )
-                      )
-                     )
-          ; keyboard center hole
-          (binding [*fn* 100] (cylinder 2.3 20))
+          (union
+            (translate [-4.2, 4.9, 0]
+              (binding [*fn* 100] (cylinder 2.2 , socket-wall-height))
+            )
+            (translate [-4.2, 4, 0]
+              (cube 4, 2, socket-wall-height)
+            )
+            (translate [1, 4.8, 0]
+                       (cube 9, 4.3, socket-wall-height)
+            )
+            (difference
+              (translate [-4.0, 2.8, 0]
+                        (cube 9, 4,socket-wall-height)
+                        )
+              (translate [0, 0.55, 0]
+                        (binding [*fn* 100] (cylinder 2.3 socket-wall-height))
+                        )
+            )
+            (translate [7.4, 4.5, 0]
+                       (cube 4, 9.5, socket-wall-height)
+                       )
+            (translate [-9, 4.9, 0]
+                       (cube 3, 8, socket-wall-height)
+            )
           )
-   ;half hole
-   (translate [0 (/ (+ keyswitch-width 3) -4) (- -2.05 socket-height-adjust) ]
-              (cube (+ keyswitch-height 3.6) (/ (+ keyswitch-width 3) 2) 3.1)
-              )
-   ;(binding [*fn* 50] (cylinder 2 2))
-   )
+        )
+      )
+    )
+
+    ; hot-swap socket hole
+    (scale [1 1 1]
+      (translate [0.075 4.815 (- -2.75 socket-height-adjust)]
+        (union
+          (translate [2.475 0.325 0]
+            (binding [*fn* 200] (cylinder hot-swap-radius 20))
+          )
+          (translate [-3.875 -2.215 0]
+            (binding [*fn* 200] (cylinder hot-swap-radius 20))
+          )
+
+
+        )
+      )
+      ; keyboard center hole
+      (binding [*fn* 100] (cylinder 2.3 20))
+      ; 5ft - socket holes
+      (translate [-5.08 0 0] (binding [*fn* 100] (cylinder 1.1 20)))
+      (translate [5.08 0 0] (binding [*fn* 100] (cylinder 1.1 20)))
+    )
+    ;half hole
+    (translate [0 (/ (+ keyswitch-width 3) -3) (- -2.05 socket-height-adjust) ]
+               (cube (+ keyswitch-height 3.6) (/ (+ keyswitch-width 3) 3) 3.1)
+    )
+    ;(binding [*fn* 50] (cylinder 2 2))
   )
+)
 
 (def hot-socket
   (if low-profile
@@ -1175,6 +1202,6 @@
 (spit "things/left-plate-print.scad" (write-scad (mirror [-1 0 0] plate-right)))
 
 (spit "things/hotswap-low-debug.scad" (write-scad hot-socket-low-profile))
-(spit "things/hotswap-standart.scad" (write-scad hot-socket-standart))
+(spit "things/hotswap-standart-debug.scad" (write-scad hot-socket-standart))
 
 (defn -main [dum] 1)  ; dummy to make it easier to batch
